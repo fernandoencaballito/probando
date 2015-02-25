@@ -1,0 +1,20 @@
+connected to the administration of the pop3 proxy server
++OK password required to administrate de server
+PASS password
++OK readY
+MET1
+xx//Number of accesses:
+MET2
+xx//Bytes transfered to origin servers
+SET user originUrl
++OK
+TOFF
++OK transformation of the subject is off
+TON
++OK transformation of the subject is on
+MON
++OK accounts multiplexing is on
+MOFF 
++OK accounts multiplexing is off
+QUIT
++OK
