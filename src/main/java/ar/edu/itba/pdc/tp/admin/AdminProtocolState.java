@@ -57,7 +57,6 @@ public class AdminProtocolState {
     }
 
     ByteBuffer getClientBuffer() {
-        // TODO Auto-generated method stub
         return clientBuffer;
     }
 
@@ -92,6 +91,7 @@ public class AdminProtocolState {
         while(clientBuffer.hasRemaining() && isLineDone()){
         	clientBuffer.get();
         }
+        
         return bytesRead;
     }
 }

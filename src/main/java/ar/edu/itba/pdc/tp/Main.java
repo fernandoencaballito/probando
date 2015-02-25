@@ -1,40 +1,54 @@
 package ar.edu.itba.pdc.tp;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.admin.AdminProtocol;
-import ar.edu.itba.pdc.tp.pop3.POP3ProxyProtocol;
+import ar.edu.itba.pdc.tp.pop3.POP3Proxy;
 import ar.edu.itba.pdc.tp.tcp.TCPProtocol;
-import ar.edu.itba.pdc.tp.tcp.TCPReactor;
+import ar.edu.itba.pdc.tp.tcp.TCPReactorImpl;
 
 public class Main {
-	private static final int bufferSize = 4 * 1024;// 4k
+    private static final short ADMIN_PORT = 10001;
+    private static final short PROXY_PORT = 10002;
 
-	private static final short POP3_PORT = 110; // 110;// puerto del origin
-													// server de pop3
-	private static final short ADMIN_PORT = 10001;
-	private static final short PROXY_PORT = 10002;
+    private static final int BUFFER_SIZE = 4 * 1024; // 4k
 
-	public static void main(String[] args) throws IOException {
-		final InetSocketAddress POP3_ADDRESS = new InetSocketAddress(
-				InetAddress.getLocalHost().getHostAddress(), PROXY_PORT);
-		final InetSocketAddress ADMIN_ADDRESS = new InetSocketAddress(
-				InetAddress.getLocalHost().getHostAddress(), ADMIN_PORT);
-		Map<Integer, TCPProtocol> protocolHandlers = new HashMap<>();
+    private static final Logger LOGGER = Logger.getLogger(Main.class);
+    
+    public static void main(String[] args) throws IOException {
+        if (args.length != 3) {
+            throw new IllegalArgumentException(
+                    "Parameter: <origin-server> <port> <proxy-address>");
+        }
 
-		AdminModule adminModule = new AdminModule("localhost", POP3_PORT);
+        short pop3_port = Short.valueOf(args[1]);
 
-		protocolHandlers.put(POP3_ADDRESS.getPort(), new POP3ProxyProtocol(
-				adminModule));
-		protocolHandlers.put(ADMIN_ADDRESS.getPort(), new AdminProtocol(
-				bufferSize, adminModule));
+        InetSocketAddress pop3_address = new InetSocketAddress(args[2],
+                PROXY_PORT);
+        InetSocketAddress admin_address = new InetSocketAddress(args[2],
+                ADMIN_PORT);
 
-		TCPReactor reactor = new TCPReactor(protocolHandlers);
-		reactor.start();
-	}
+        Map<Integer, TCPProtocol> protocolHandlers = new HashMap<>();
+
+        AdminModule adminModule = new AdminModule(args[0], pop3_port);
+
+        TCPReactorImpl reactor = new TCPReactorImpl(protocolHandlers, args[0]);
+
+        POP3Proxy pop3Proxy = new POP3Proxy(reactor, adminModule);
+        AdminProtocol admin = new AdminProtocol(reactor, BUFFER_SIZE,
+                adminModule);
+
+        protocolHandlers.put(pop3_address.getPort(), pop3Proxy);
+        protocolHandlers.put(admin_address.getPort(), admin);
+        
+        LOGGER.info("Proxy POP3 started...");
+        
+        reactor.start();
+    }
 }

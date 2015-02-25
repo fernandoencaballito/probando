@@ -9,182 +9,158 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
-import ar.edu.itba.pdc.tp.admin.AdminModule;
-import ar.edu.itba.pdc.tp.admin.AdminProtocolState;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class POP3ProxyState {
+import ar.edu.itba.pdc.tp.email.EmailConverter;
 
-	private static final int MAX_LINE_LEN = 1000;
+class POP3ProxyState {
+	private static final int BUFF_SIZE = 4 * 1024;
 
-	private SocketChannel clientChannel;
-	private SocketChannel originChannel;
-	private final int BUFF_SIZE = 4 * 1024;
+	private final ByteBuffer originBuffer = ByteBuffer.allocate(BUFF_SIZE);
+	private final ByteBuffer convertedOriginBuffer = ByteBuffer
+			.allocate(BUFF_SIZE);
+	private final ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
 
-	private final ByteBuffer toOriginBuffer = ByteBuffer.allocate(BUFF_SIZE);
-	private final ByteBuffer toClientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+	private final SocketChannel clientChannel;
+	private SocketChannel originChannel = null;
 
-	public States state = States.AUTHENTICATION;
+	private States state = States.AUTHENTICATION;
+	private POP3Line line = new POP3Line();
 
-	private ByteBuffer lastLine = null;
-	private int readCount = 0;
-	private boolean lineDone = false;
-	private boolean carriageReturn = false; // Indica si ya pase un por un '\r'
-	private boolean sendingCapa = false;
+	private EmailConverter emailConverter = null;
 
-	protected POP3ProxyState(final SocketChannel clientChannel,
-			final SocketChannel originChannel) {
+	POP3ProxyState(final SocketChannel clientChannel) {
 		this.clientChannel = clientChannel;
-		this.originChannel = originChannel;
 	}
 
-	/* obtiene el buffer donde se deben dejar los bytes leidos */
-	public ByteBuffer readBufferFor(final SocketChannel channel) {
-		final ByteBuffer ret;
-
-		// no usamos equals porque la comparacion es suficiente por instancia
+	// *proxy's* write, that is, where the other end will *read*
+	ByteBuffer getWriteBuffer(final SocketChannel channel) {
 		if (clientChannel == channel) {
-			ret = toOriginBuffer;
-		} else if (originChannel == channel) {
-			ret = toClientBuffer;
-		} else {
-			throw new IllegalArgumentException("Unknown socket");
+			if (convertedOriginBuffer.position() > 0) { 
+				return convertedOriginBuffer;
+			} else {
+				return originBuffer;
+			}
 		}
-
-		return ret;
+		if (originChannel == channel) {
+			return clientBuffer;
+		}
+		throw new IllegalArgumentException("Unknown socket");
 	}
 
-	public ByteBuffer writeBufferFor(SocketChannel channel) {
-		final ByteBuffer ret;
-
-		// no usamos equals porque la comparacion es suficiente por instancia
+	// *proxy's* read, that is, where the other end will *write*
+	ByteBuffer getReadBuffer(SocketChannel channel) {
 		if (clientChannel == channel) {
-			ret = toClientBuffer;
-		} else if (originChannel == channel) {
-			ret = toOriginBuffer;
-		} else {
-			throw new IllegalArgumentException("Unknown socket");
+			return clientBuffer;
 		}
-
-		return ret;
+		if (originChannel == channel) {
+			return originBuffer;
+		}
+		throw new IllegalArgumentException("Unknown socket");
 	}
 
-	/* cierra los canales. */
-	public void closeChannels() throws IOException {
-		closeQuietly(clientChannel);
-		closeQuietly(originChannel);
-	}
-
-	public void setChannels(SocketChannel clientChannel,
-			SocketChannel originChannel) {
-		this.clientChannel = clientChannel;
-		this.originChannel = originChannel;
-	}
-
-	public void setOriginChannel(SocketChannel originChannel) {
-		this.originChannel = originChannel;
-	}
-
-	public void updateSubscription(Selector selector)
-			throws ClosedChannelException {
+	void updateSubscription(Selector selector) throws ClosedChannelException {
 		int originFlags = 0;
 		int clientFlags = 0;
 
-		if (toOriginBuffer.hasRemaining()) {
-			clientFlags |= SelectionKey.OP_READ;
-		}
-		if (toClientBuffer.hasRemaining()) {
+		if (originBuffer.hasRemaining()) {
 			originFlags |= SelectionKey.OP_READ;
 		}
 
-		if (toOriginBuffer.position() > 0) {
+		if (clientBuffer.hasRemaining()) {
+			clientFlags |= SelectionKey.OP_READ;
+		}
+
+		if (clientBuffer.position() > 0) {
 			originFlags |= SelectionKey.OP_WRITE;
 		}
-		if (toClientBuffer.position() > 0) {
+
+		if (originBuffer.position() > 0 || convertedOriginBuffer.position() > 0) {
 			clientFlags |= SelectionKey.OP_WRITE;
 		}
 
 		clientChannel.register(selector, clientFlags, this);
-		if (originChannel != null && originChannel.isOpen()) {
+		if (isConnectedToOrigin()) {
 			originChannel.register(selector, originFlags, this);
 		}
 	}
 
-	public SocketChannel getClientChannel() {
+	void closeChannels() throws IOException {
+		closeQuietly(clientChannel);
+		if (originChannel != null) {
+			closeQuietly(originChannel);
+		}
+	}
+
+	void setOriginChannel(SocketChannel originChannel) {
+		if (this.originChannel != null) {
+			throw new IllegalStateException();
+		}
+		this.originChannel = originChannel;
+	}
+
+	POP3Line getLine() {
+		return line;
+	}
+
+	SocketChannel getClientChannel() {
 		return clientChannel;
 	}
 
-	public SocketChannel getOriginChannel() {
+	SocketChannel getOriginChannel() {
 		return originChannel;
 	}
 
-	public ByteBuffer getToClientBuffer() {
-		return toClientBuffer;
+	ByteBuffer getClientBuffer() {
+		return clientBuffer;
 	}
 
-	public ByteBuffer getToOriginBuffer() {
-		return toOriginBuffer;
+	ByteBuffer getOriginBuffer() {
+		return originBuffer;
 	}
 
-	public States getState() {
+	public ByteBuffer getConvertedOriginBuffer() {
+		return convertedOriginBuffer;
+	}
+
+	States getState() {
 		return state;
 	}
 
-	public void setState(States state) {
+	void setState(States state) {
 		this.state = state;
 	}
 
-	public ByteBuffer getLastLine() {
-		return lastLine;
+	void startEmailHeaderTransfer() {
+		this.convertedOriginBuffer.clear();
+		this.emailConverter = new EmailConverter();
 	}
 
-	public int getReadCount() {
-		return readCount;
+	EmailConverter getEmailConverter() {
+		return emailConverter;
 	}
 
-	public boolean isLineDone() {
-		return lineDone;
+	void endEmailHeaderTransfer() {
+		this.emailConverter = null;
 	}
 
-	public ByteBuffer flushLastLine() {
-		if (lastLine == null) {
-			lastLine = ByteBuffer.allocate(MAX_LINE_LEN);
-		} else {
-			lastLine.clear();
-		}
-		readCount = 0;
-		lineDone = false;
-		return lastLine;
+	boolean isConnectedToOrigin() {
+		return originChannel != null && originChannel.isOpen()
+				&& originChannel.isConnected();
 	}
 
-	public void putChar(byte b) {
-		// lastLine.putChar(1, c);
-		char c = (char) b;
-		lastLine.put(b);
-		readCount++;
-
-		if (carriageReturn && c == '\n') {
-			lineDone = true;
-			return;
-		} else {
-			carriageReturn = false;
-		}
-
-		if (c == '\r') {
-			carriageReturn = true;
-		}
-
-		lineDone = (readCount == MAX_LINE_LEN);
-	}
-
-	public void setSendingCapa(boolean b) {
-		this.sendingCapa = b;
-	}
-
-	public boolean getSendingCapa() {
-		return this.sendingCapa;
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this).append("clientBuffer", clientBuffer)
+				.append("originBuffer", originBuffer)
+				.append("convertedOriginBuffer", convertedOriginBuffer)
+				.append("clientChannel", clientChannel)
+				.append("originChannel", originChannel).append("state", state)
+				.append("line", line).toString();
 	}
 
 	enum States {
-		EXPECT_USER_OK, EXPECT_PASS_OK, EXPECT_RETR_DATA, GREETING, TRANSACTION, AUTHENTICATION, QUITTING
+		EXPECT_USER_OK, EXPECT_PASS_OK, EXPECT_RETR_DATA, GREETING, TRANSACTION, QUITTING, AUTHENTICATION
 	}
+
 }

@@ -7,217 +7,224 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import ar.edu.itba.pdc.tp.tcp.TCPConnectionData;
 import ar.edu.itba.pdc.tp.tcp.TCPProtocol;
+import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
 public class AdminProtocol implements TCPProtocol {
-	private int bufSize; // Size of I/O buffer
+    private int bufSize; // Size of I/O buffer
 
-	private AdminModule reactorState;
+    private AdminModule reactorState;
 
-	private final String ADMIN_PASSWORD = "password";
-	private static final String CORRECT_LOGIN_MSG = "+OK ready\r\n";
-	private static final String INCORRECT_LOGIN_MSG = "-ERR wrong password\r\n";
-	private static final String INCORRECT_COMMAND = "-ERR invalid command\r\n";
-	private static final String CORRECT_OPERATION = "+OK \r\n";
-	private static final String TRANSFORMATION_ON_MSG = "+OK transformation of the subject is on \r\n";
-	private static final String TRANSFORMATION_OFF_MSG = "+OK transformation of the subject is off \r\n";
-	private static final String MULTIPLEXING_ON_MSG = "+OK accounts multiplexing is on\r\n";
-	private static final String MULTIPLEXING_OFF_MSG = "+OK accounts multiplexing is off\r\n";
+    private final String ADMIN_PASSWORD = "password";
+    private static final String CORRECT_LOGIN_MSG = "+OK ready\r\n";
+    private static final String INCORRECT_LOGIN_MSG = "-ERR wrong password\r\n";
+    private static final String INCORRECT_COMMAND = "-ERR invalid command\r\n";
+    private static final String CORRECT_OPERATION = "+OK \r\n";
+    private static final String TRANSFORMATION_ON_MSG = "+OK transformation of the subject is on \r\n";
+    private static final String TRANSFORMATION_OFF_MSG = "+OK transformation of the subject is off \r\n";
+    private static final String MULTIPLEXING_ON_MSG = "+OK accounts multiplexing is on\r\n";
+    private static final String MULTIPLEXING_OFF_MSG = "+OK accounts multiplexing is off\r\n";
 
-	private static final String transformationOffRegex = "TOFF\\r\\n";
-	private static final String transformationOnRegex = "TON\\r\\n";
-	private static final String multiplexingOnRegex = "MON\\r\\n";
-	private static final String multiplexingOffRegex = "MOFF\\r\\n";
-	private static final String passRegex = "PASS\\s.*\\r\\n";
-	private static final String metricsAccessesRegex = "MET1\\r\\n";
-	private static final String metricsTransferedRegex = "MET2\\r\\n";
-	private static final String quitRegex = "QUIT\\r\\n";
+    private static final String transformationOffRegex = "TOFF\\r\\n";
+    private static final String transformationOnRegex = "TON\\r\\n";
+    private static final String multiplexingOnRegex = "MON\\r\\n";
+    private static final String multiplexingOffRegex = "MOFF\\r\\n";
+    private static final String passRegex = "PASS\\s.*\\r\\n";
+    private static final String metricsAccessesRegex = "MET1\\r\\n";
+    private static final String metricsTransferedRegex = "MET2\\r\\n";
+    private static final String quitRegex = "QUIT\\r\\n";
 
-	private static final Pattern patternPass = Pattern.compile(passRegex);
-	private static final Pattern patternMetricsAccesses = Pattern
-			.compile(metricsAccessesRegex);
-	private static final Pattern patternMetricsTransfered = Pattern
-			.compile(metricsTransferedRegex);
-	private static final Pattern patternQuit = Pattern.compile(quitRegex);
-	private static final Pattern patternTransformationOff = Pattern
-			.compile(transformationOffRegex);
-	private static final Pattern patternTransformationOn = Pattern
-			.compile(transformationOnRegex);
-	private static final Pattern patternMultiplexingOn = Pattern
-			.compile(multiplexingOnRegex);
-	private static final Pattern patternMultiplexingOff = Pattern
-			.compile(multiplexingOffRegex);
+    private static final Pattern patternPass = Pattern.compile(passRegex);
+    private static final Pattern patternMetricsAccesses = Pattern
+            .compile(metricsAccessesRegex);
+    private static final Pattern patternMetricsTransfered = Pattern
+            .compile(metricsTransferedRegex);
+    private static final Pattern patternQuit = Pattern.compile(quitRegex);
+    private static final Pattern patternTransformationOff = Pattern
+            .compile(transformationOffRegex);
+    private static final Pattern patternTransformationOn = Pattern
+            .compile(transformationOnRegex);
+    private static final Pattern patternMultiplexingOn = Pattern
+            .compile(multiplexingOnRegex);
+    private static final Pattern patternMultiplexingOff = Pattern
+            .compile(multiplexingOffRegex);
 
-	private static final Logger log = Logger.getLogger(AdminProtocol.class);
+    private static final Logger LOGGER = Logger.getLogger(AdminProtocol.class);
 
-	public AdminProtocol(int bufSize, AdminModule reactorState) {
-		this.bufSize = bufSize;
-		this.reactorState = reactorState;
-	}
+    private final TCPReactor reactor;
 
-	public TCPConnectionData handleAccept(SelectionKey key) throws IOException {
-		SocketChannel clntChan = ((ServerSocketChannel) key.channel()).accept();
-		clntChan.configureBlocking(false);
-		clntChan.register(key.selector(), SelectionKey.OP_READ,
-				new AdminProtocolState(bufSize));
-		log.info("Connected: "
-				+ ((ServerSocketChannel) key.channel()).getLocalAddress());
-		return new TCPConnectionData(clntChan);
-	}
+    public AdminProtocol(TCPReactor reactor, int bufSize,
+            AdminModule reactorState) {
+        this.bufSize = bufSize;
+        this.reactorState = reactorState;
+        this.reactor = reactor;
+    }
 
-	public void handleRead(SelectionKey key,
-			Map<SocketChannel, TCPProtocol> handlersByChannel)
-			throws IOException {
-		// Client socket channel has pending data
-		SocketChannel clntChan = (SocketChannel) key.channel();
-		AdminProtocolState adminState = (AdminProtocolState) key.attachment();
-		long bytesRead = adminState.readFromChannel(clntChan);
-		if (bytesRead == -1) { // Did the other end close?
-			clntChan.close();
-		} else if (bytesRead > 0) {
-			// Indicate via key that reading/writing are both of interest now.
-			key.interestOps(SelectionKey.OP_READ);
+    @Override
+    public void handleAccept(SelectionKey key) throws IOException {
+        SocketChannel clientChannel = ((ServerSocketChannel) key.channel())
+                .accept();
+        clientChannel.configureBlocking(false);
+        clientChannel.register(key.selector(), SelectionKey.OP_READ,
+                new AdminProtocolState(bufSize));
+        LOGGER.info("Connected: "
+                + ((ServerSocketChannel) key.channel()).getLocalAddress());
+        reactor.subscribeChannel(clientChannel, this);
+    }
 
-			if (adminState.isLineDone())
-				key.interestOps(SelectionKey.OP_WRITE);
-		}
-	}
+    @Override
+    public void handleRead(SelectionKey key) throws IOException {
+        // Client socket channel has pending data
+        SocketChannel clientChannel = (SocketChannel) key.channel();
+        AdminProtocolState adminState = (AdminProtocolState) key.attachment();
+        long bytesRead = adminState.readFromChannel(clientChannel);
+        if (bytesRead == -1) { // Did the other end close?
+            clientChannel.close();
+            reactor.unsubscribeChannel(clientChannel);
+        } else if (bytesRead > 0) {
+            // Indicate via key that reading/writing are both of interest now.
+            key.interestOps(SelectionKey.OP_READ);
 
-	// respuestas al cliente
-	public void handleWrite(SelectionKey key) throws IOException {
-		/*
-		 * Channel is available for writing, and key is valid (i.e., client
-		 * channel not closed).
-		 */
-		// Retrieve data read earlier
+            if (adminState.isLineDone())
+                key.interestOps(SelectionKey.OP_WRITE);
+        }
+    }
 
-		AdminProtocolState adminState = (AdminProtocolState) key.attachment();
-		ByteBuffer buf = adminState.getClientBuffer();
+    // respuestas al cliente
+    @Override
+    public void handleWrite(SelectionKey key) throws IOException {
+        /*
+         * Channel is available for writing, and key is valid (i.e., client
+         * channel not closed).
+         */
+        // Retrieve data read earlier
 
-		boolean connected = handleResponse(adminState);
+        AdminProtocolState adminState = (AdminProtocolState) key.attachment();
+        ByteBuffer buf = adminState.getClientBuffer();
 
-		buf.flip();// prepare buffer for writing
-		SocketChannel clntChan = (SocketChannel) key.channel();
-		clntChan.write(buf);
+        boolean connected = handleResponse(adminState);
 
-		if (!buf.hasRemaining()) { // Buffer completely written?
-			// Nothing left, so no longer interested in writes
-			key.interestOps(SelectionKey.OP_READ);
-		}
-		buf.compact(); // Make room for more data to be read in
-		if (!connected)
-			clntChan.close();
-	}
+        buf.flip();// prepare buffer for writing
+        SocketChannel clientChannel = (SocketChannel) key.channel();
+        clientChannel.write(buf);
 
-	private boolean handleResponse(AdminProtocolState adminState)
-			throws UnsupportedEncodingException {
-		boolean connected = true;
-		String ans = null;
+        if (!buf.hasRemaining()) { // Buffer completely written?
+            // Nothing left, so no longer interested in writes
+            key.interestOps(SelectionKey.OP_READ);
+        }
+        buf.compact(); // Make room for more data to be read in
+        if (!connected) {
+            clientChannel.close();
+        }
+    }
 
-		// Specify the appropriate encoding as the last argument
-		ByteBuffer lastLine = adminState.getLastLine();
-		String fromUser = prepareBuffer(lastLine);
-		ByteBuffer buf = adminState.getBuffer();
-		AdminStateEnum stateEnum = adminState.getState();
+    private boolean handleResponse(AdminProtocolState adminState)
+            throws UnsupportedEncodingException {
+        boolean connected = true;
+        String ans = null;
 
-		if (stateEnum == AdminStateEnum.EXPECT_PASS) {
+        // Specify the appropriate encoding as the last argument
+        ByteBuffer lastLine = adminState.getLastLine();
+        String fromUser = prepareBuffer(lastLine);
+        ByteBuffer buf = adminState.getBuffer();
+        AdminStateEnum stateEnum = adminState.getState();
 
-			if (patternPass.matcher(fromUser).matches()) {
-				String enteredPassword = (fromUser.split(" ")[1]).trim();
-				// login correcto
-				if (this.ADMIN_PASSWORD.equals(enteredPassword)) {
-					stateEnum = AdminStateEnum.TRANSACTION;
-					ans = CORRECT_LOGIN_MSG;
-					log.info("Correct login");
-				} else {
-					ans = INCORRECT_LOGIN_MSG;
-					log.info("Incorrect login");
-				}
-			} else {
-				// no se ingreso correctamente el comando PASS
-				ans = INCORRECT_COMMAND;
-				log.info("Incorrect command: " + fromUser);
-			}
-		} else if (stateEnum == AdminStateEnum.TRANSACTION) {
-			log.info("Command: " + fromUser);
-			List<String> userOriginUrl;
-			// hay que cerrar la conexion
-			if (patternQuit.matcher(fromUser).matches()) {
-				connected = false;
-				ans = CORRECT_OPERATION;
-				log.info("Disconnected");
-			} else if (patternMetricsAccesses.matcher(fromUser).matches()) {
-				ans = buildMetrics1Msg();
-			} else if (patternMetricsTransfered.matcher(fromUser).matches()) {
-				ans = buildMetrics2Msg();
-			} else if (patternTransformationOff.matcher(fromUser).matches()) {
-				ans = TRANSFORMATION_OFF_MSG;
-				reactorState.transformationOff();
-			} else if (patternTransformationOn.matcher(fromUser).matches()) {
-				ans = TRANSFORMATION_ON_MSG;
-				reactorState.transformationOn();
-			} else if (patternMultiplexingOn.matcher(fromUser).matches()) {
-				ans = MULTIPLEXING_ON_MSG;
-				reactorState.multiplexingOn();
-			} else if (patternMultiplexingOff.matcher(fromUser).matches()) {
-				ans = MULTIPLEXING_OFF_MSG;
-				reactorState.multiplexingOff();
-			} else if ((userOriginUrl = (SetUserValidator.validate(fromUser))) != null) {
-				reactorState.setOriginForUser(userOriginUrl.get(0),
-						userOriginUrl.get(1));
-				ans = CORRECT_OPERATION;
+        String[] split = fromUser.split("\r\n");
+        if (stateEnum == AdminStateEnum.EXPECT_PASS) {
 
-			} else {
+            if (patternPass.matcher(fromUser).matches()) {
+                String enteredPassword = (fromUser.split(" ")[1]).trim();
+                // login correcto
+                if (this.ADMIN_PASSWORD.equals(enteredPassword)) {
+                    stateEnum = AdminStateEnum.TRANSACTION;
+                    ans = CORRECT_LOGIN_MSG;
+                    LOGGER.info("Correct login");
+                } else {
+                    ans = INCORRECT_LOGIN_MSG;
+                    LOGGER.info("Incorrect login");
+                }
+            } else {
+                // no se ingreso correctamente el comando PASS
+                ans = INCORRECT_COMMAND;
+                LOGGER.info("Incorrect command: " + split[0]);
+            }
+        } else if (stateEnum == AdminStateEnum.TRANSACTION) {
+            LOGGER.info("Command: " + split[0]);
+            List<String> userOriginUrl;
+            // hay que cerrar la conexion
+            if (patternQuit.matcher(fromUser).matches()) {
+                connected = false;
+                ans = CORRECT_OPERATION;
+                LOGGER.info("Disconnected");
+            } else if (patternMetricsAccesses.matcher(fromUser).matches()) {
+                ans = buildMetrics1Msg();
+            } else if (patternMetricsTransfered.matcher(fromUser).matches()) {
+                ans = buildMetrics2Msg();
+            } else if (patternTransformationOff.matcher(fromUser).matches()) {
+                ans = TRANSFORMATION_OFF_MSG;
+                reactorState.transformationOff();
+            } else if (patternTransformationOn.matcher(fromUser).matches()) {
+                ans = TRANSFORMATION_ON_MSG;
+                reactorState.transformationOn();
+            } else if (patternMultiplexingOn.matcher(fromUser).matches()) {
+                ans = MULTIPLEXING_ON_MSG;
+                reactorState.multiplexingOn();
+            } else if (patternMultiplexingOff.matcher(fromUser).matches()) {
+                ans = MULTIPLEXING_OFF_MSG;
+                reactorState.multiplexingOff();
+            } else if ((userOriginUrl = (SetUserValidator.validate(fromUser))) != null) {
+                reactorState.setOriginForUser(userOriginUrl.get(0),
+                        userOriginUrl.get(1));
+                ans = CORRECT_OPERATION;
 
-				ans = INCORRECT_COMMAND;
-			}
-		}
+            } else {
 
-		log.info("Response: " + ans);
-		buf.compact();
-		buf.put(ans.getBytes());
-		adminState.setState(stateEnum);
-		adminState.clearLastLine();
-		return connected;
-	}
+                ans = INCORRECT_COMMAND;
+            }
+        }
+        split = ans.split("\r\n");
+        LOGGER.info("Response: " + split[0]);
+        buf.compact();
+        buf.put(ans.getBytes());
+        adminState.setState(stateEnum);
+        adminState.clearLastLine();
+        return connected;
+    }
 
-	// metricas, cantidad de accesos
-	private String buildMetrics1Msg() {
-		String ans = reactorState.getAccesses() + "\r\n";
-		return ans;
-	}
+    // metricas, cantidad de accesos
+    private String buildMetrics1Msg() {
+        String ans = reactorState.getAccesses() + "\r\n";
+        return ans;
+    }
 
-	// metricas, cantidad de bytes transferidos
-	private String buildMetrics2Msg() {
-		String ans = reactorState.getBytesTransfered() + "\r\n";
-		return ans;
-	}
+    // metricas, cantidad de bytes transferidos
+    private String buildMetrics2Msg() {
+        String ans = reactorState.getBytesTransfered() + "\r\n";
+        return ans;
+    }
 
-	private String prepareBuffer(ByteBuffer buffer) {
-		String read = "";
+    private String prepareBuffer(ByteBuffer buffer) {
+        String read = "";
 
-		buffer.flip();
-		int size = buffer.limit() - buffer.position();
-		byte[] array = new byte[size];
-		buffer.get(array);
-		try {
-			if (buffer.limit() != 0) {
-				read = new String(array, 0, size, "US-ASCII");
-			}
-		} catch (UnsupportedEncodingException e) {
+        buffer.flip();
+        int size = buffer.limit() - buffer.position();
+        byte[] array = new byte[size];
+        buffer.get(array);
+        try {
+            if (buffer.limit() != 0) {
+                read = new String(array, 0, size, "US-ASCII");
+            }
+        } catch (UnsupportedEncodingException e) {
 
-		}
-		return read;
-	}
+        }
+        return read;
+    }
 
-	@Override
-	public void handleConnect(SelectionKey key) throws IOException {
-		// TODO Auto-generated method stub
-	}
+    @Override
+    public void handleConnect(SelectionKey key) throws IOException {
+    }
 }

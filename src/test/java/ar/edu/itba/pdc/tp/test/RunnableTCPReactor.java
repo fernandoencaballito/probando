@@ -5,16 +5,16 @@ import java.nio.channels.Selector;
 import java.util.Map;
 
 import ar.edu.itba.pdc.tp.tcp.TCPProtocol;
-import ar.edu.itba.pdc.tp.tcp.TCPReactor;
+import ar.edu.itba.pdc.tp.tcp.TCPReactorImpl;
 
-public class RunnableTCPReactor extends TCPReactor implements Runnable {
+public class RunnableTCPReactor extends TCPReactorImpl implements Runnable {
 	// private static final int TIMEOUT = 2000;
 
 	private boolean listening = false;
 	private int eventCount;
 
 	public RunnableTCPReactor(Map<Integer, TCPProtocol> protocolsByPort) {
-		super(3000, protocolsByPort);
+		super(3000, protocolsByPort,"localhost");
 	}
 
 	public boolean isListening() {
