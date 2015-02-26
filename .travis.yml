@@ -1,5 +1,5 @@
 language: java
-script: -chmod ugo+x scripts/compileProject.sh
+script: -chmod 700 scripts/compileProject.sh
         - ./scripts/compileProject.sh
 
 
