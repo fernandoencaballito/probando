@@ -1,4 +1,2 @@
 language: java
-script:- chmod 700 ./scripts/compileProject.sh && ./scripts/compileProject.sh
-
-
+script:  "./scripts/compileProject.sh"
