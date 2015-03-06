@@ -1,8 +1,11 @@
 #!/bin/bash
-rm ./docs/caratulaCommit
-cat ./docs/caratula_parte1 >> ./docs/caratulaCommit 
+fileName='./docs/caratulaCommit'
+rm  $fileName
+cat ./docs/caratula_parte1 >> $fileName 
 git fetch
-git rev-parse origin/master >> ./docs/caratulaCommit
-cat ./docs/caratula_parte2 >> ./docs/caratulaCommit
-echo 'antes bol'
+git rev-parse origin/master >> $fileName
+cat ./docs/caratula_parte2 >> $fileName
+echo 'archivo armado'
+lpr $fileName
+echo 'archivo enviado a imprimir'
 
