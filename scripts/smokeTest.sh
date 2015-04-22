@@ -2,8 +2,10 @@
 cleanup(){
 previousExitCode=$?
 if [ $previousExitCode -eq 124 ]; then
+	echo 'Paso la smokeTest.sh'
 	 exit 0
 fi
+echo 'ERROR: FALLA EN LA smokeTest.sh'
 exit $previousExitCode
 }
 
