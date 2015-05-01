@@ -1,5 +1,5 @@
 language: java
-script:  "./scripts/compileProject.sh"
+script:  "./scripts/mainScript.sh"
 addons:
   apt_packages:
     - pandoc

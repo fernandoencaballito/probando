@@ -14,5 +14,5 @@ set -ev
 mvn clean package
 chmod 700 $jarPath
 trap  "cleanup" EXIT
-sudo timeout 20s java -jar $jarPath localhost 110 localhost
+timeout 20s java -jar $jarPath localhost 110 localhost
 
