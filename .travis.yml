@@ -3,3 +3,6 @@ script:  "./scripts/compileProject.sh"
 addons:
   apt_packages:
     - pandoc
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install aspell-es
