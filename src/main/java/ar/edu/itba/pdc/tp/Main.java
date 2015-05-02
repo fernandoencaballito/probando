@@ -18,7 +18,7 @@ import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 public class Main {
 	// nombre del archivo de propiedades
 
-	private static String PROPERTIES_FILENAME;
+	private static String PROPERTIES_FILENAME="./proxyServer.properties";
 
 	private static short ADMIN_PORT;
 	private static short PROXY_SERVER_PORT;
@@ -34,11 +34,13 @@ public class Main {
 
 	private static final Logger LOGGER = Logger.getLogger(Main.class);
 
+	//opcionalmente como primer parámetro, se puede indicar el archivo de configuración.Por defecto se lo busca en la carpeta actual.
+	
 	public static void main(String[] args) throws IOException {
-		if (args.length != 1) {
-			throw new IllegalArgumentException(
-					"Parameter: <path to properties file>");
+		if (args.length == 1) {
+			PROPERTIES_FILENAME = args[0];
 		}
+		
 		// se cargan valores de configuración
 		PROPERTIES_FILENAME = args[0];
 		loadPropertiesFile(PROPERTIES_FILENAME);
@@ -64,7 +66,7 @@ public class Main {
 		protocolHandlers.put(pop3_address.getPort(), pop3Proxy);
 		protocolHandlers.put(admin_address.getPort(), admin);
 
-		LOGGER.info("Proxy POP3 started...");
+		LOGGER.info("Proxy XMPP started...");
 
 		reactor.start();
 	}
