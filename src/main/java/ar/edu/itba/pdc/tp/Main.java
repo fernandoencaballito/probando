@@ -84,10 +84,10 @@ public class Main {
 		ORIGIN_SERVER_PORT = Short.parseShort(properties
 				.getProperty("ORIGIN_SERVER_PORT"));
 
-		boolean multiplexing = Boolean.getBoolean(properties
+		DEFAULT_MULTIPLEXING = Boolean.getBoolean(properties
 				.getProperty("multiplexing"));
 
-		boolean message_transformation = Boolean.getBoolean(properties
+		DEFAULT_TRANSFORMATION = Boolean.getBoolean(properties
 				.getProperty("message_transformation"));
 
 	}
