@@ -1,12 +1,12 @@
-% TPE de protos
+% Trabajo práctico especial 
 % Alumnos: Agustin Prado; Pablo Pauli ; Fernando Bejarano 
-% Fecha de entrega: Miercoles 10 de Junio 
+% Fecha de entrega: Miércoles 10 de Junio 
 
-# Descripcion detallada de los protocolos y aplicaciones desarrolladas
+# Descripción detallada de los protocolos y aplicaciones desarrolladas
 
-# Problemas encontrados durante el diseno y la implementacion
+# Problemas encontrados durante el diseño y la implementación
 
-# Limitaciones de la aplicacion
+# Limitaciones de la aplicación
 
 # Posibles extensiones
 
@@ -14,10 +14,14 @@
 
 # Ejemplos de testeo
 
-#  Guia de instalacion detallada y precisa.  
+# Guia de instalación detallada y precisa.  
 
-# Instrucciones para la configuracion.
+# Instrucciones para la configuración.
 
-# Ejemplos de configuracion y monitoreo.
+# Ejemplos de configuración y monitoreo.
 
-# Documento de diseno del proyecto (que ayuden a entender la arquitectura de la aplicacion)
+# Documento de diseño del proyecto (que ayuden a entender la arquitectura de la aplicación)
+
+# Pruebas de stress
+* cuál es la máxima cantidad de conexiones simultáneas que soporta?
+* cómo se degrada el throughput?
