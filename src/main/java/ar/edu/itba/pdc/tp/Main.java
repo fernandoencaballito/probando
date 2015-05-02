@@ -1,6 +1,5 @@
 package ar.edu.itba.pdc.tp;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -24,19 +23,19 @@ public class Main {
 	private static short ADMIN_PORT;
 	private static short PROXY_SERVER_PORT;
 	private static String PROXY_ADDRESS;
-	
+
 	private static String DEFAULT_ORIGIN_SERVER;
 	private static short ORIGIN_SERVER_PORT;
 
 	private static boolean DEFAULT_MULTIPLEXING;
 	private static boolean DEFAULT_TRANSFORMATION;
-	
+
 	private static final int BUFFER_SIZE = 4 * 1024; // 4k
 
 	private static final Logger LOGGER = Logger.getLogger(Main.class);
 
 	public static void main(String[] args) throws IOException {
-		if (args.length != 0) {
+		if (args.length != 1) {
 			throw new IllegalArgumentException(
 					"Parameter: <path to properties file>");
 		}
@@ -70,11 +69,10 @@ public class Main {
 		reactor.start();
 	}
 
-	private static void loadPropertiesFile(String fileName)
-			throws FileNotFoundException {
-
+	private static void loadPropertiesFile(String fileName) throws IOException {
 		Properties properties = PropertiesFileLoader
 				.loadPropertiesFromFile(fileName);
+
 		ADMIN_PORT = Short.parseShort(properties.getProperty("ADMIN_PORT"));
 		PROXY_SERVER_PORT = Short.parseShort(properties
 				.getProperty("PROXY_SERVER_PORT"));
@@ -84,11 +82,12 @@ public class Main {
 		ORIGIN_SERVER_PORT = Short.parseShort(properties
 				.getProperty("ORIGIN_SERVER_PORT"));
 
-		DEFAULT_MULTIPLEXING = Boolean.getBoolean(properties
-				.getProperty("multiplexing"));
+		String aux = properties.getProperty("multiplexing");
+		DEFAULT_MULTIPLEXING = new Boolean(
+				properties.getProperty("multiplexing"));
 
-		DEFAULT_TRANSFORMATION = Boolean.getBoolean(properties
-				.getProperty("message_transformation"));
+		DEFAULT_TRANSFORMATION = new Boolean(
+				properties.getProperty("message_transformation"));
 
 	}
 
