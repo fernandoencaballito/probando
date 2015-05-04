@@ -12,3 +12,5 @@ bin/
 logs/
 *.log
 /docs/caratulaCommit
+/docs/Informe.pdf
+/binary/tpeBinary.jar
