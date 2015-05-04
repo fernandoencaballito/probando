@@ -13,4 +13,5 @@ logs/
 *.log
 docs/caratulaCommit
 docs/Informe.pdf
-binary/*
+binary/tpeBinary.jar
+binary/proxyServer.properties
