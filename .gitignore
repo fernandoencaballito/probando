@@ -11,6 +11,6 @@
 bin/
 logs/
 *.log
-/docs/caratulaCommit
-/docs/Informe.pdf
-/binary/*
+docs/caratulaCommit
+docs/Informe.pdf
+binary/*
