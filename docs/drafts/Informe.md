@@ -22,6 +22,14 @@
 
 # Documento de diseño del proyecto (que ayuden a entender la arquitectura de la aplicación)
 
+ ![arquitectura](drafts/arquitectura.jpg "arquitectura")
+Modulo administrador
+Modulo XMPP
+Modulo de metricas
+Modulo "AdminModule"
+
+
+
 # Pruebas de stress
 * cuál es la máxima cantidad de conexiones simultáneas que soporta?
 * cómo se degrada el throughput?

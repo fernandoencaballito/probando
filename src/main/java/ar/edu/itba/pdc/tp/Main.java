@@ -42,8 +42,6 @@ public class Main {
 			PROPERTIES_FILENAME = args[0];
 		}
 
-		// se cargan valores de configuración
-		PROPERTIES_FILENAME = args[0];
 
 		try {
 
