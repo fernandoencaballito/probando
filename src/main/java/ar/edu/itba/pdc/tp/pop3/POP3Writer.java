@@ -22,47 +22,25 @@ class POP3Writer implements TCPEventHandler {
 
     @Override
     public void handle(SelectionKey key) throws IOException {
-        final POP3ProxyState proxyState = (POP3ProxyState) key.attachment();
-        final SocketChannel channel = (SocketChannel) key.channel();
-
-        final ByteBuffer writeBuffer = proxyState.getWriteBuffer(channel);
-        ByteBuffer duplicateBuffer = (ByteBuffer) writeBuffer.duplicate()
-                .flip();
-        if (proxyState.getClientChannel() == channel) {
-            if (proxyState.getOriginChannel() != null
-                    && (duplicateBuffer.get() == '+' || duplicateBuffer.get() == '-')) {
-                LOGGER.info("Origin("
-                        + proxyState.getOriginChannel().getRemoteAddress()
-                        + ") wrote to client("
-                        + channel.getRemoteAddress()
-                        + "): "
-                        + StringEscapeUtils.escapeJava(NIOUtils
-                                .getFirstLine(duplicateBuffer)));
-
-            } else if (duplicateBuffer.get() == '+'
-                    || duplicateBuffer.get() == '-') {
-                LOGGER.info("ProxyPOP3 wrote to client("
-                        + channel.getRemoteAddress()
-                        + "): "
-                        + StringEscapeUtils.escapeJava(NIOUtils
-                                .getFirstLine((ByteBuffer) writeBuffer
-                                        .duplicate().flip())));
-            }
-        } else {
-            LOGGER.info("Client("
-                    + proxyState.getClientChannel().getRemoteAddress()
-                    + ") wrote to origin("
-                    + channel.getRemoteAddress()
-                    + "): "
-                    + StringEscapeUtils.escapeJava(NIOUtils
-                            .getFirstLine((ByteBuffer) writeBuffer.duplicate()
-                                    .flip())));
-        }
-
-        writeBuffer.flip(); // Prepare buffer for writing
-        int amount = channel.write(writeBuffer);
-        writeBuffer.compact(); // Make room for more data to be read in
-        adminModule.addBytesTransfered(amount);
-        proxyState.updateSubscription(key.selector());
+    	  /*
+         * Channel is available for writing, and key is valid (i.e., client
+         * channel not closed).
+         */
+        // Retrieve data read earlier
+    	
+    	final POP3ProxyState proxyState = (POP3ProxyState) key.attachment();
+        
+    	final SocketChannel channel = (SocketChannel) key.channel();
+    	
+    	ByteBuffer buf = (ByteBuffer) proxyState.getWriteBuffer(channel);
+        buf.flip(); // Prepare buffer for writing
+        SocketChannel writeChannel = (SocketChannel) key.channel();
+        writeChannel.write(buf);
+//        if (!buf.hasRemaining()) { // Buffer completely written?
+//            // Nothing left, so no longer interested in writes
+//            key.interestOps(SelectionKey.OP_READ);
+//        }
+        buf.compact(); // Make room for more data to be read in
+    
     }
 }

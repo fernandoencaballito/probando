@@ -33,58 +33,7 @@ class POP3ProxyState {
 		this.clientChannel = clientChannel;
 	}
 
-	// *proxy's* write, that is, where the other end will *read*
-	ByteBuffer getWriteBuffer(final SocketChannel channel) {
-		if (clientChannel == channel) {
-			if (convertedOriginBuffer.position() > 0) { 
-				return convertedOriginBuffer;
-			} else {
-				return originBuffer;
-			}
-		}
-		if (originChannel == channel) {
-			return clientBuffer;
-		}
-		throw new IllegalArgumentException("Unknown socket");
-	}
-
-	// *proxy's* read, that is, where the other end will *write*
-	ByteBuffer getReadBuffer(SocketChannel channel) {
-		if (clientChannel == channel) {
-			return clientBuffer;
-		}
-		if (originChannel == channel) {
-			return originBuffer;
-		}
-		throw new IllegalArgumentException("Unknown socket");
-	}
-
-	void updateSubscription(Selector selector) throws ClosedChannelException {
-		int originFlags = 0;
-		int clientFlags = 0;
-
-		if (originBuffer.hasRemaining()) {
-			originFlags |= SelectionKey.OP_READ;
-		}
-
-		if (clientBuffer.hasRemaining()) {
-			clientFlags |= SelectionKey.OP_READ;
-		}
-
-		if (clientBuffer.position() > 0) {
-			originFlags |= SelectionKey.OP_WRITE;
-		}
-
-		if (originBuffer.position() > 0 || convertedOriginBuffer.position() > 0) {
-			clientFlags |= SelectionKey.OP_WRITE;
-		}
-
-		clientChannel.register(selector, clientFlags, this);
-		if (isConnectedToOrigin()) {
-			originChannel.register(selector, originFlags, this);
-		}
-	}
-
+	
 	void closeChannels() throws IOException {
 		closeQuietly(clientChannel);
 		if (originChannel != null) {
@@ -163,4 +112,58 @@ class POP3ProxyState {
 		EXPECT_USER_OK, EXPECT_PASS_OK, EXPECT_RETR_DATA, GREETING, TRANSACTION, QUITTING, AUTHENTICATION
 	}
 
+	
+	ByteBuffer getReadBuffer(SocketChannel channel) {
+		if (clientChannel == channel) {
+			return clientBuffer;
+		}
+		if (originChannel == channel) {
+			return originBuffer;
+		}
+		throw new IllegalArgumentException("Unknown socket");
+	}
+	
+	
+
+	// *proxy's* write, that is, where the other end will *read*
+	ByteBuffer getWriteBuffer(final SocketChannel channel) {
+		if (clientChannel == channel) {
+			if (convertedOriginBuffer.position() > 0) { 
+				return convertedOriginBuffer;
+			} else {
+				return originBuffer;
+			}
+		}
+		if (originChannel == channel) {
+			return clientBuffer;
+		}
+		throw new IllegalArgumentException("Unknown socket");
+	}
+	
+	
+	void updateSubscription(Selector selector) throws ClosedChannelException {
+		int originFlags = 0;
+		int clientFlags = 0;
+
+		if (originBuffer.hasRemaining()) {
+			originFlags |= SelectionKey.OP_READ;
+		}
+
+		if (clientBuffer.hasRemaining()) {
+			clientFlags |= SelectionKey.OP_READ;
+		}
+
+		if (clientBuffer.position() > 0) {
+			originFlags |= SelectionKey.OP_WRITE;
+		}
+
+		if (originBuffer.position() > 0 ) {
+			clientFlags |= SelectionKey.OP_WRITE;
+		}
+
+		clientChannel.register(selector, clientFlags, this);
+		if (isConnectedToOrigin()) {
+			originChannel.register(selector, originFlags, this);
+		}
+	}
 }

@@ -24,25 +24,7 @@ class POP3Connector implements TCPEventHandler {
         POP3ProxyState state = (POP3ProxyState) key.attachment();
         SocketChannel originChannel = (SocketChannel) key.channel();
 
-        try {
-            if (originChannel.finishConnect()) {
-                // nos interesa cualquier cosa que venga de cualquiera de las
-                // dos puntas
-                LOGGER.info("Channel "
-                        + state.getClientChannel().getRemoteAddress()
-                        + " connected to origin server");
-                state.updateSubscription(key.selector());
-            } else {
-                state.closeChannels();
-            }
-        } catch (IOException e) {
-            LOGGER.error("Failed to connect to origin server("
-                    + originChannel.getRemoteAddress() + "): " + e.getMessage());
-            // state.closeChannels();
-            ByteBuffer clientBuffer = state.getClientBuffer();
-            writeMsg(clientBuffer, UNABLE_TO_CONNECT_MSG);
-            state.updateSubscription(key.selector());
-        }
+       
     }
 
     private void writeMsg(ByteBuffer toClientBuffer, String msg) { // XXX
