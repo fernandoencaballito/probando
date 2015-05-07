@@ -1,5 +1,6 @@
 package ar.edu.itba.pdc.tp;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -72,13 +73,15 @@ public class Main {
 			LOGGER.info("Proxy XMPP started...");
 
 			reactor.start();
-		} catch (IOException | MissingPropertyException e) {
+		} catch (FileNotFoundException | MissingPropertyException e) {
 			LOGGER.error("Unable to read properties file: "
 					+ PROPERTIES_FILENAME);
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 
-	private static void loadPropertiesFile(String fileName) throws IOException,MissingPropertyException {
+	private static void loadPropertiesFile(String fileName) throws FileNotFoundException,MissingPropertyException {
 		Properties properties = PropertiesFileLoader
 				.loadPropertiesFromFile(fileName);
 
