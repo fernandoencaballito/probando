@@ -1,4 +1,4 @@
-package ar.edu.itba.pdc.tp.pop3;
+package ar.edu.itba.pdc.tp.XMPP;
 
 import static ar.edu.itba.pdc.tp.util.POP3Utils.asOkLine;
 
@@ -15,15 +15,15 @@ import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
-class POP3Acceptor implements TCPEventHandler {
+class XMPPAcceptor implements TCPEventHandler {
     private static final String GREETING_MSG = asOkLine("ready");
     private static final int BUFFER_SIZE = 4 * 1024;
-    private final POP3Proxy parent;
+    private final XMPproxy parent;
     private final TCPReactor reactor;
     private AdminModule adminModule;
-    private static final Logger LOGGER = Logger.getLogger(POP3Acceptor.class);
+    private static final Logger LOGGER = Logger.getLogger(XMPPAcceptor.class);
 
-    POP3Acceptor(POP3Proxy parent, TCPReactor reactor, AdminModule admMod) {
+    XMPPAcceptor(XMPproxy parent, TCPReactor reactor, AdminModule admMod) {
         this.reactor = reactor;
         this.parent = parent;
         this.adminModule = admMod;
@@ -37,9 +37,9 @@ class POP3Acceptor implements TCPEventHandler {
         clntChan.configureBlocking(false); // Must be nonblocking to register
         // Register the selector with new channel for read and attach byte
         // buffer
-        POP3ProxyState state=new POP3ProxyState(clntChan);
+        XMPPproxyState state=new XMPPproxyState(clntChan);
         clntChan.register(key.selector(), SelectionKey.OP_READ, state);
-        
+        clntChan.configureBlocking(false);
         //
         SocketChannel origin = SocketChannel.open();
         origin.configureBlocking(false);
@@ -48,7 +48,10 @@ class POP3Acceptor implements TCPEventHandler {
         origin.finishConnect();
         state.setOriginChannel(origin);
         //
-        
+        state.updateSubscription(key.selector());
+
         reactor.subscribeChannel(clntChan, parent);
+        reactor.subscribeChannel(origin, parent);
+        
     }
 }

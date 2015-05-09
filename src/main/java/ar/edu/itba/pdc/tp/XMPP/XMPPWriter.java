@@ -1,4 +1,4 @@
-package ar.edu.itba.pdc.tp.pop3;
+package ar.edu.itba.pdc.tp.XMPP;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,11 +12,11 @@ import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
 import ar.edu.itba.pdc.tp.util.NIOUtils;
 
-class POP3Writer implements TCPEventHandler {
-    private static final Logger LOGGER = Logger.getLogger(POP3Writer.class);
+class XMPPWriter implements TCPEventHandler {
+    private static final Logger LOGGER = Logger.getLogger(XMPPWriter.class);
     private AdminModule adminModule;
 
-    POP3Writer(AdminModule adminMod) {
+    XMPPWriter(AdminModule adminMod) {
         this.adminModule = adminMod;
     }
 
@@ -28,7 +28,7 @@ class POP3Writer implements TCPEventHandler {
          */
         // Retrieve data read earlier
     	
-    	final POP3ProxyState proxyState = (POP3ProxyState) key.attachment();
+    	final XMPPproxyState proxyState = (XMPPproxyState) key.attachment();
         
     	final SocketChannel channel = (SocketChannel) key.channel();
     	
@@ -41,6 +41,6 @@ class POP3Writer implements TCPEventHandler {
 //            key.interestOps(SelectionKey.OP_READ);
 //        }
         buf.compact(); // Make room for more data to be read in
-    
+        proxyState.updateSubscription(key.selector());
     }
 }

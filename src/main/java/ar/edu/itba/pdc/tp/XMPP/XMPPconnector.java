@@ -1,4 +1,4 @@
-package ar.edu.itba.pdc.tp.pop3;
+package ar.edu.itba.pdc.tp.XMPP;
 
 import static ar.edu.itba.pdc.tp.util.POP3Utils.asErrLine;
 
@@ -11,17 +11,17 @@ import org.apache.log4j.Logger;
 
 import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
 
-class POP3Connector implements TCPEventHandler {
-    private static final Logger LOGGER = Logger.getLogger(POP3Connector.class);
+class XMPPconnector implements TCPEventHandler {
+    private static final Logger LOGGER = Logger.getLogger(XMPPconnector.class);
 
     private static final String UNABLE_TO_CONNECT_MSG = asErrLine("unable to connect");
 
-    POP3Connector() {
+    XMPPconnector() {
     }
 
     @Override
     public void handle(SelectionKey key) throws IOException {
-        POP3ProxyState state = (POP3ProxyState) key.attachment();
+        XMPPproxyState state = (XMPPproxyState) key.attachment();
         SocketChannel originChannel = (SocketChannel) key.channel();
 
        

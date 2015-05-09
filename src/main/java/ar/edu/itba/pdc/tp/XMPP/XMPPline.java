@@ -1,4 +1,4 @@
-package ar.edu.itba.pdc.tp.pop3;
+package ar.edu.itba.pdc.tp.XMPP;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -9,7 +9,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-class POP3Line {
+class XMPPline {
 	private static final int ORIG_CAPACITY = 512;
 	private static final String CHARSET = "UTF-8";
 
@@ -20,7 +20,7 @@ class POP3Line {
 	private LineReadingStates state = null;
 	private int index = 0;
 
-	POP3Line() {
+	XMPPline() {
 	}
 
 	void read(ByteBuffer readBuffer) {

@@ -1,4 +1,4 @@
-package ar.edu.itba.pdc.tp.pop3;
+package ar.edu.itba.pdc.tp.XMPP;
 
 import static ar.edu.itba.pdc.tp.util.NIOUtils.append;
 import static ar.edu.itba.pdc.tp.util.NIOUtils.nonBlockingSocket;
@@ -24,7 +24,7 @@ import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 import ar.edu.itba.pdc.tp.util.NIOUtils;
 
-class POP3Reader implements TCPEventHandler {
+class XMPPreader implements TCPEventHandler {
     private static final String CAPA = "CAPA";
     private static final String USER = "USER";
     private static final String PASS = "PASS";
@@ -37,15 +37,15 @@ class POP3Reader implements TCPEventHandler {
     private static final String CAPA_AUTHENTICATION_MSG = asMultilines(CAPA,
             USER);
 
-    private static final Logger LOGGER = Logger.getLogger(POP3Reader.class);
+    private static final Logger LOGGER = Logger.getLogger(XMPPreader.class);
 
     private static final String ERR_MSG = asErrLine("");
 
     private final TCPReactor reactor;
     private final AdminModule adminModule;
-    private final POP3Proxy parent;
+    private final XMPproxy parent;
 
-    POP3Reader(POP3Proxy parent, TCPReactor reactor, AdminModule adminModule) {
+    XMPPreader(XMPproxy parent, TCPReactor reactor, AdminModule adminModule) {
         this.parent = parent;
         this.reactor = reactor;
         this.adminModule = adminModule;
@@ -54,7 +54,7 @@ class POP3Reader implements TCPEventHandler {
     @Override
     public void handle(SelectionKey key) throws IOException {
        
-    	final POP3ProxyState proxyState = (POP3ProxyState) key.attachment();
+    	final XMPPproxyState proxyState = (XMPPproxyState) key.attachment();
 
         final SocketChannel readChannel = (SocketChannel) key.channel();
         final ByteBuffer readBuffer = proxyState.getReadBuffer(readChannel);
@@ -72,10 +72,33 @@ class POP3Reader implements TCPEventHandler {
         	
         }
         
-        writeChannel.read(readBuffer);
-        writeChannel.register(key.selector(), SelectionKey.OP_WRITE,
-                proxyState);
-        reactor.subscribeChannel(writeChannel, parent);
+//        long bytesRead =writeChannel.read(readBuffer);
+        long bytesRead =readChannel.read(readBuffer);
+        
+        if (bytesRead == -1) { // Did the other end close?
+        	proxyState.closeChannels();
+        	reactor.unsubscribeChannel(proxyState.getClientChannel());
+            reactor.unsubscribeChannel(proxyState.getOriginChannel());
+        } else if (bytesRead > 0) {
+            // Indicate via key that reading are both of interest now.
+            //key.interestOps(SelectionKey.OP_READ );
+            proxyState.updateSubscription(key.selector());
+        }
+        
+        
+//        writeChannel.register(key.selector(), SelectionKey.OP_WRITE,
+//                proxyState);
+//        reactor.subscribeChannel(writeChannel, parent);
+        
+        
+        
+//        long bytesRead = clntChan.read(buf);
+//        if (bytesRead == -1) { // Did the other end close?
+//            clntChan.close();
+//        } else if (bytesRead > 0) {
+//            // Indicate via key that reading/writing are both of interest now.
+//            key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+//        }
         
     }
 

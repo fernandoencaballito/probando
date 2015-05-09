@@ -1,4 +1,4 @@
-package ar.edu.itba.pdc.tp.pop3;
+package ar.edu.itba.pdc.tp.XMPP;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -7,17 +7,17 @@ import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.tcp.TCPProtocol;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
-public class POP3Proxy implements TCPProtocol{
-	private final POP3Acceptor acceptor;
-	private final POP3Connector connector;
-	private final POP3Reader reader;
-	private final POP3Writer writer;
+public class XMPproxy implements TCPProtocol{
+	private final XMPPAcceptor acceptor;
+	private final XMPPconnector connector;
+	private final XMPPreader reader;
+	private final XMPPWriter writer;
 
-	public POP3Proxy(TCPReactor reactor, AdminModule adminModule) {
-		this.acceptor = new POP3Acceptor(this, reactor,adminModule);
-		this.connector = new POP3Connector();
-		this.writer = new POP3Writer(adminModule);
-		this.reader = new POP3Reader(this, reactor, adminModule);
+	public XMPproxy(TCPReactor reactor, AdminModule adminModule) {
+		this.acceptor = new XMPPAcceptor(this, reactor,adminModule);
+		this.connector = new XMPPconnector();
+		this.writer = new XMPPWriter(adminModule);
+		this.reader = new XMPPreader(this, reactor, adminModule);
 	}
 
 	@Override

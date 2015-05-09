@@ -9,9 +9,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
 import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.admin.AdminProtocol;
-import ar.edu.itba.pdc.tp.pop3.POP3Proxy;
 import ar.edu.itba.pdc.tp.tcp.TCPProtocol;
 import ar.edu.itba.pdc.tp.tcp.TCPReactorImpl;
 import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
@@ -63,7 +63,7 @@ public class Main {
 			TCPReactorImpl reactor = new TCPReactorImpl(protocolHandlers,
 					DEFAULT_ORIGIN_SERVER);
 
-			POP3Proxy pop3Proxy = new POP3Proxy(reactor, adminModule);
+			XMPproxy pop3Proxy = new XMPproxy(reactor, adminModule);
 			AdminProtocol admin = new AdminProtocol(reactor, BUFFER_SIZE,
 					adminModule);
 

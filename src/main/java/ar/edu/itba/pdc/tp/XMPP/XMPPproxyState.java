@@ -1,4 +1,4 @@
-package ar.edu.itba.pdc.tp.pop3;
+package ar.edu.itba.pdc.tp.XMPP;
 
 import static ar.edu.itba.pdc.tp.util.NIOUtils.closeQuietly;
 
@@ -13,7 +13,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import ar.edu.itba.pdc.tp.email.EmailConverter;
 
-class POP3ProxyState {
+class XMPPproxyState {
 	private static final int BUFF_SIZE = 4 * 1024;
 
 	private final ByteBuffer originBuffer = ByteBuffer.allocate(BUFF_SIZE);
@@ -25,11 +25,11 @@ class POP3ProxyState {
 	private SocketChannel originChannel = null;
 
 	private States state = States.AUTHENTICATION;
-	private POP3Line line = new POP3Line();
+	private XMPPline line = new XMPPline();
 
 	private EmailConverter emailConverter = null;
 
-	POP3ProxyState(final SocketChannel clientChannel) {
+	XMPPproxyState(final SocketChannel clientChannel) {
 		this.clientChannel = clientChannel;
 	}
 
@@ -48,7 +48,7 @@ class POP3ProxyState {
 		this.originChannel = originChannel;
 	}
 
-	POP3Line getLine() {
+	XMPPline getLine() {
 		return line;
 	}
 
