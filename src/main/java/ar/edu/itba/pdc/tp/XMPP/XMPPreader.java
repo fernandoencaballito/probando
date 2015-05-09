@@ -83,24 +83,35 @@ class XMPPreader implements TCPEventHandler {
             // Indicate via key that reading are both of interest now.
             //key.interestOps(SelectionKey.OP_READ );
             proxyState.updateSubscription(key.selector());
+            if(proxyState.getOriginChannel()==null){
+            connectToOrigin(key, proxyState,"hola");
+            }
+            
         }
         
         
-//        writeChannel.register(key.selector(), SelectionKey.OP_WRITE,
-//                proxyState);
-//        reactor.subscribeChannel(writeChannel, parent);
-        
-        
-        
-//        long bytesRead = clntChan.read(buf);
-//        if (bytesRead == -1) { // Did the other end close?
-//            clntChan.close();
-//        } else if (bytesRead > 0) {
-//            // Indicate via key that reading/writing are both of interest now.
-//            key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-//        }
         
     }
+
+	private void connectToOrigin(SelectionKey key, XMPPproxyState proxyState,
+			String user) {
+		try {
+            InetSocketAddress originAddress = adminModule.getOriginAddressForUser(user);
+            SocketChannel originChannel = nonBlockingSocket(originAddress);
+            proxyState.setOriginChannel(originChannel);
+            originChannel.register(key.selector(), SelectionKey.OP_CONNECT,
+                    proxyState);
+            reactor.subscribeChannel(originChannel, parent);
+        } catch (IOException e) {
+           // sendResponseToClient(proxyState, ERR);
+        }
+   
+	}
+		
+	
+	
+}
+
 
     
     
@@ -108,5 +119,4 @@ class XMPPreader implements TCPEventHandler {
     
     
     
-   
-}
+

@@ -41,12 +41,12 @@ class XMPPAcceptor implements TCPEventHandler {
         clntChan.register(key.selector(), SelectionKey.OP_READ, state);
         clntChan.configureBlocking(false);
         //
-        SocketChannel origin = SocketChannel.open();
+       SocketChannel origin = SocketChannel.open();
         origin.configureBlocking(false);
-
+        /*
         origin.connect(adminModule.getOriginAddressForUser(null));
         origin.finishConnect();
-        state.setOriginChannel(origin);
+        state.setOriginChannel(origin);*/
         //
         state.updateSubscription(key.selector());
 
