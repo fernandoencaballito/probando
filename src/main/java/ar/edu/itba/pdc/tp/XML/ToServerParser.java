@@ -1,7 +1,9 @@
 package ar.edu.itba.pdc.tp.XML;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -23,14 +25,16 @@ public class ToServerParser extends GenericParser {
 	    XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 	    // create XMLEventWriter
 	    XMLEventWriter eventWriter = outputFactory
-	        .createXMLEventWriter(out);
-	    // create an EventFactory
-	    XMLEventFactory eventFactory = XMLEventFactory.newInstance();
-	    // create and write Start Tag
-	   
-	    eventWriter.add(startElement);
-
+	        .createXMLEventWriter(out,"UTF-8");
 	    
+	    
+	    eventWriter.add(startElement);
+	    try {
+			out.write(">".getBytes("UTF-8"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 

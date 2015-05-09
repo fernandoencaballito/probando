@@ -5,5 +5,6 @@ configurationFile="./proxyServer.properties"
 finalPath="./binary/"
 mvn clean package
 #echo $defaultJarPath $finalJarPath
+mkdir binary
 cp $defaultJarPath $finalJarPath
 cp $configurationFile $finalPath

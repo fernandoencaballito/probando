@@ -1,21 +1,24 @@
 package ar.edu.itba.pdc.tp.test.XML;
-
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.Test;
-import org.springframework.core.GenericTypeResolver;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.XML.ToServerParser;
@@ -23,16 +26,15 @@ import ar.edu.itba.pdc.tp.XML.ToServerParser;
 public class TestToServerParser {
 
 	@Test
-	public void testStartingStream() throws IOException{
-		String inFileName="./src/test/resources/startingStreamFromClient.in";
-		String outFileName="./src/test/resources/startingStreamFromClient.out";
+	public void testStartingStream() throws IOException, SAXException, ParserConfigurationException{
+		String fileName="./src/test/resources/startingStreamFromClient.in";
 		
-		genericTest(inFileName,outFileName);
+		genericTest(fileName,fileName);
 		
 		
 	}
 	
-	private static void genericTest(String inFileName,String outFileName) throws IOException{
+	private static void genericTest(String inFileName,String outFileName) throws IOException, SAXException, ParserConfigurationException{
 		InputStream in = new FileInputStream(inFileName);
 		
 		String outStr=readFile(outFileName);
@@ -41,9 +43,22 @@ public class TestToServerParser {
 		GenericParser parser=new ToServerParser(in,currentAns);
 		parser.parse();
 		//no graba la respuesta porque no encuentra tag stream
-//		assertEquals(outStr,currentAns.toString(StandardCharsets.UTF_8.name()));
-	}
+		assertEquals(outStr.trim(),currentAns.toString());
+//		checkXML(outStr, currentAns.toString(StandardCharsets.UTF_8.name()));
 	
+	}
+//	static void checkXML(String expected, String actual) throws SAXException, IOException, ParserConfigurationException{
+//		
+//		
+//		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
+//	    DocumentBuilder builder;  
+//	     
+//	        builder = factory.newDocumentBuilder();  
+//	        Document document_expected = builder.parse( new InputSource( new StringReader( expected ) ) );  
+//	        Document actual_document = builder.parse( new InputSource( new StringReader( actual) ) );  
+//	     assertTrue(document_expected.equals(actual_document));
+//		
+//	}
 	static String readFile(String path) 
 			  throws IOException 
 			{

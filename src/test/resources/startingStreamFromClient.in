@@ -1,7 +1,1 @@
-<stream:stream
-        from='juliet@im.example.com'
-        to='im.example.com'
-        version='1.0'
-        xml:lang='en'
-        xmlns='jabber:client'
-        xmlns:stream='http://etherx.jabber.org/streams'>
+<stream:stream xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams" to="im.example.com" xml:lang="en" from="j@im.example.com" version="1.0"> 

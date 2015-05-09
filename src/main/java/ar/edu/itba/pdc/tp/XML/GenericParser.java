@@ -14,7 +14,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 public abstract class GenericParser {
-	private static final String STREAM = "['http://etherx.jabber.org/streams']:stream:stream";
+	private static final String STREAM = "stream";
 	private static final String MESSAGE = "message";
 
 	protected InputStream in;
@@ -43,13 +43,13 @@ public abstract class GenericParser {
 
 	public void parse() {
 		try {
-
 			while (eventReader.hasNext()) {
 				XMLEvent event = eventReader.nextEvent();
-
+				
 				if (event.isStartElement()) {
+					
 					StartElement startElement = event.asStartElement();
-
+					System.out.println(startElement.getName().getLocalPart());
 					// If we have an item element, we create a new element
 					if (startElement.getName().getLocalPart() == (STREAM)) {
 
