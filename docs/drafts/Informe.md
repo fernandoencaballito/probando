@@ -4,6 +4,29 @@
 
 # Descripción detallada de los protocolos y aplicaciones desarrolladas
 
+Protocolo administrador
+connected to the administration of the pop3 proxy server
+S: +OK password required to administrate the server
+C: PASS password
+S: +OK ready
+C: MET1
+S: xx.
+C: MET2
+S: xx.
+C: SET user originUrl
+S: +OK
+C: MON
+S: +OK accounts multiplexing is on
+C: MOFF
+S: +OK accounts multiplexing is off
+C: TOFF
+S: +OK transformation of the subject is off
+C: TON
+S: +OK transformation of the subject is on
+C: QUIT
+S: +OK
+
+
 # Problemas encontrados durante el diseño y la implementación
 
 # Limitaciones de la aplicación
