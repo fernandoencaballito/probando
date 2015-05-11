@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<stream:stream xmlns:stream="http://etherx.jabber.org/streams" version="1.0" xmlns="jabber:client" to="protos" xml:lang="en" xmlns:xml="http://www.w3.org/XML/1998/namespace">
+<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">AHByb3RvczEAcGFzcw==</auth>
