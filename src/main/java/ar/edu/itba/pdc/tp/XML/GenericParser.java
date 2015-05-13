@@ -1,19 +1,13 @@
 package ar.edu.itba.pdc.tp.XML;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import com.fasterxml.aalto.AsyncByteBufferFeeder;
-import com.fasterxml.aalto.AsyncInputFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
@@ -55,26 +49,35 @@ public class GenericParser {
 				System.out.println("OCURRIO TIPO: " + type);
 				switch (type) {
 
-				
+				case 257: {
+					// IGNORAR
+					break;
+				}
 				case XMLEvent.START_DOCUMENT:
 					System.out.println("start document");
 					break;
 				case XMLEvent.START_ELEMENT:
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
+					processStartElement();
 					break;
-				case XMLEvent.CHARACTERS:{
-					System.out.println("characters length: "
-							+ asyncXMLStreamReader.getText().trim().length());
-					
+				case XMLEvent.CHARACTERS: {
+					String str = asyncXMLStreamReader.getText().trim();
+					if (str.length() == 0)
+						break;// ignorar
+
+					System.out.println("characters :" + str);
+
 					break;
 				}
 				case XMLEvent.END_ELEMENT:
 					System.out.println("end element: "
 							+ asyncXMLStreamReader.getName());
+					processEndElement();
 					break;
 				case XMLEvent.END_DOCUMENT:
 					System.out.println("end document");
+					processEndDocument();
 					break;
 				default:
 					break;
@@ -101,6 +104,35 @@ public class GenericParser {
 
 	}
 
+	private void processEndDocument() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void processEndElement() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void processStartElement() {
+		QName qname = asyncXMLStreamReader.getName();
+		String elementName = qname.getLocalPart();
+		switch (elementName) {
+		case STREAM: {
+
+			break;
+		}
+		case MESSAGE:{
+			
+		}
+
+		default:
+			break;
+		}
+
+	}
+
+	// solo parar elemento STREAM:STREAM
 	protected void processStreamElement(StartElement startElement)
 			throws XMLStreamException {
 

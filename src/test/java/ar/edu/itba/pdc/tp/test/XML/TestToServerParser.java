@@ -67,29 +67,29 @@ public class TestToServerParser {
 ////				assertEquals(expectedString.trim(),currentAns.toString());
 	}
 	
-	private static void genericTest(String inFileName,String outFileName) throws IOException, SAXException, ParserConfigurationException{
-		//InputStream in = new FileInputStream(inFileName);
-		
-		ByteBuffer buffer=ByteBuffer.allocate(BUFF_SIZE);
-//		InputStream in=new ByteBufferInputStream(buffer);
-		String expectedString=readFile(outFileName);
+//	private static void genericTest(String inFileName,String outFileName) throws IOException, SAXException, ParserConfigurationException{
+//		//InputStream in = new FileInputStream(inFileName);
 //		
-		InputStream in=new ByteBufferInputStream(buffer);
-		readFileIntoBuffer(inFileName, buffer);
-		assertTrue(buffer.position()>0);
-		
-		ByteArrayOutputStream currentAns=new ByteArrayOutputStream();
-		
-		//SE TIENE QUE PASAR EL BUFFER A MODO LECTURA
-		buffer.flip();
-		GenericParser parser=new ToServerParser(in,currentAns);
-		
-		
-		parser.parse();
-		//no graba la respuesta porque no encuentra tag stream
-//	assertEquals(expectedString.trim(),currentAns.toString());
-	
-	}
+//		ByteBuffer buffer=ByteBuffer.allocate(BUFF_SIZE);
+////		InputStream in=new ByteBufferInputStream(buffer);
+//		String expectedString=readFile(outFileName);
+////		
+//		InputStream in=new ByteBufferInputStream(buffer);
+//		readFileIntoBuffer(inFileName, buffer);
+//		assertTrue(buffer.position()>0);
+//		
+//		ByteArrayOutputStream currentAns=new ByteArrayOutputStream();
+//		
+//		//SE TIENE QUE PASAR EL BUFFER A MODO LECTURA
+//		buffer.flip();
+////		GenericParser parser=new ToServerParser(in,currentAns);
+//		
+//		
+////		parser.parse();
+//		//no graba la respuesta porque no encuentra tag stream
+////	assertEquals(expectedString.trim(),currentAns.toString());
+//	
+//	}
 	
 	static void readFileIntoBuffer(String path,ByteBuffer buffer) throws IOException{
 		RandomAccessFile aFile = new RandomAccessFile(path, "r");
