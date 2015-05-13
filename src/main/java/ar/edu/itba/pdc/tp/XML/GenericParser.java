@@ -49,12 +49,13 @@ public class GenericParser {
 	public void parse() {
 
 		try {
-			while (asyncXMLStreamReader.hasNext()) {
+			while (!feeder.needMoreInput()) {
 				type = asyncXMLStreamReader.next();
 
 				System.out.println("OCURRIO TIPO: " + type);
 				switch (type) {
 
+				
 				case XMLEvent.START_DOCUMENT:
 					System.out.println("start document");
 					break;
@@ -62,10 +63,12 @@ public class GenericParser {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
 					break;
-				case XMLEvent.CHARACTERS:
-					System.out.println("characters: "
-							+ asyncXMLStreamReader.getText());
+				case XMLEvent.CHARACTERS:{
+					System.out.println("characters length: "
+							+ asyncXMLStreamReader.getText().trim().length());
+					
 					break;
+				}
 				case XMLEvent.END_ELEMENT:
 					System.out.println("end element: "
 							+ asyncXMLStreamReader.getName());

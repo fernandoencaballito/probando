@@ -26,11 +26,11 @@ public class Borrarme {
 															// net etc
 		// can construct with initial data, or without; here we initialize with
 		// it
-		
-		ByteBuffer buffer=ByteBuffer.allocate(1024);
+
+		ByteBuffer buffer = ByteBuffer.allocate(1024);
 		buffer.put(input_part1);
-	buffer.flip();
-		
+		buffer.flip();
+
 		AsyncXMLStreamReader<AsyncByteBufferFeeder> parser = inputF
 				.createAsyncFor(buffer);
 
@@ -45,15 +45,14 @@ public class Borrarme {
 		assertEquals(AsyncXMLStreamReader.EVENT_INCOMPLETE, parser.next());
 
 		// at this point, must feed more data:
-//		buffer.compact();
-//		buffer.flip();
+		// buffer.compact();
+		// buffer.flip();
 		buffer.clear();
 		byte[] input_part2 = "ue</root>".getBytes("UTF-8");
-	
+
 		buffer.put(input_part2);
 		buffer.flip();
-		
-		
+
 		parser.getInputFeeder().feedInput(buffer);
 
 		// and can parse that

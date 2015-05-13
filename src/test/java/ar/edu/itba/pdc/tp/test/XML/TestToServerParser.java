@@ -53,9 +53,9 @@ public class TestToServerParser {
 				
 				parser.parse();
 				
-				//SE TIENE QUE PASAR EL BUFFER A MODO ESCRITURA
+				
 				buffer.clear();
-				buffer.flip();
+				
 				String inFileName2="./src/test/resources/startingStreamFromClient.part2.in";
 				readFileIntoBuffer(inFileName2, buffer);
 				
