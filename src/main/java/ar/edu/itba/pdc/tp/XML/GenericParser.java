@@ -44,8 +44,12 @@ public abstract class GenericParser {
 	public void parse() {
 		try {
 			while (eventReader.hasNext()) {
-				XMLEvent event = eventReader.nextEvent();
-				
+				XMLEvent event=null;
+				try{
+				event = eventReader.nextEvent();
+				}catch(NullPointerException e){
+					e.printStackTrace();
+				}
 				if (event.isStartElement()) {
 					
 					StartElement startElement = event.asStartElement();
