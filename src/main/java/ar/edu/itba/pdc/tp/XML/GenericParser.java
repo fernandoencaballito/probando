@@ -1,81 +1,106 @@
 package ar.edu.itba.pdc.tp.XML;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
+import java.nio.ByteBuffer;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-public abstract class GenericParser {
+import com.fasterxml.aalto.AsyncByteBufferFeeder;
+import com.fasterxml.aalto.AsyncInputFeeder;
+import com.fasterxml.aalto.AsyncXMLInputFactory;
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+import com.fasterxml.aalto.stax.InputFactoryImpl;
+
+public class GenericParser {
 	private static final String STREAM = "stream";
 	private static final String MESSAGE = "message";
 
-	protected InputStream in;
-	protected OutputStream out;
+	protected ByteBuffer buffer;
 	protected Element element;
 
-	private XMLInputFactory inputFactory;
-	private XMLEventReader eventReader;
+	// aalto
+	private AsyncXMLStreamReader<AsyncByteBufferFeeder> asyncXMLStreamReader;
+	private AsyncByteBufferFeeder feeder;
 
-	public GenericParser(InputStream in, OutputStream out) {
+	private int type;
 
-		this.in = in;
-		this.out = out;
+	public GenericParser(ByteBuffer buf) throws XMLStreamException {
 
-		try {
-			// First, create a new XMLInputFactory
-			inputFactory = XMLInputFactory.newInstance();
-			// Setup a new eventReader
-			eventReader = inputFactory.createXMLEventReader(in);
-			
-			element = null;
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		}
+		this.buffer = buf;
+		AsyncXMLInputFactory xmlInputFactory = new InputFactoryImpl();
+
+		asyncXMLStreamReader = xmlInputFactory.createAsyncFor(buf);
+		feeder = asyncXMLStreamReader.getInputFeeder();
+
+		type = 0;
+	}
+
+	public void feed() throws XMLStreamException {
+		feeder.feedInput(buffer);
 	}
 
 	public void parse() {
+
 		try {
-			while (eventReader.hasNext()) {
-				XMLEvent event=null;
-				try{
-				event = eventReader.nextEvent();
-				}catch(NullPointerException e){
-					e.printStackTrace();
+			while (asyncXMLStreamReader.hasNext()) {
+				type = asyncXMLStreamReader.next();
+
+				System.out.println("OCURRIO TIPO: " + type);
+				switch (type) {
+
+				case XMLEvent.START_DOCUMENT:
+					System.out.println("start document");
+					break;
+				case XMLEvent.START_ELEMENT:
+					System.out.println("start element: "
+							+ asyncXMLStreamReader.getName());
+					break;
+				case XMLEvent.CHARACTERS:
+					System.out.println("characters: "
+							+ asyncXMLStreamReader.getText());
+					break;
+				case XMLEvent.END_ELEMENT:
+					System.out.println("end element: "
+							+ asyncXMLStreamReader.getName());
+					break;
+				case XMLEvent.END_DOCUMENT:
+					System.out.println("end document");
+					break;
+				default:
+					break;
+
+				// case XMLEvent.START_ELEMENT: {
+				// QName qname = asyncXMLStreamReader.getName();
+				// if (qname.getLocalPart() == STREAM) {
+				//
+				// // processStreamElement(startElement);
+				// System.out.println(qname);
+				//
+				// }
+				//
+				// break;
+				// }
+
 				}
-				if (event.isStartElement()) {
-					
-					StartElement startElement = event.asStartElement();
-					System.out.println(startElement.getName().getLocalPart());
-					// If we have an item element, we create a new element
-					if (startElement.getName().getLocalPart() == (STREAM)) {
-
-						processStreamElement(startElement);
-
-					}
-
-				}
-				// If we reach the end of an item element, we add it to the list
-				if (event.isEndElement()) {
-					EndElement endElement = event.asEndElement();
-					if (endElement.getName().getLocalPart() == (STREAM)) {
-
-					}
-				}
-
 			}
+
 		} catch (XMLStreamException e) {
-			
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 	}
 
-	protected abstract void processStreamElement(StartElement startElement) throws XMLStreamException;
+	protected void processStreamElement(StartElement startElement)
+			throws XMLStreamException {
+
+	}
 
 }
