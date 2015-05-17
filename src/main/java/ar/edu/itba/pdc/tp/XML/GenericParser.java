@@ -12,13 +12,15 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
-public class GenericParser {
+public abstract class GenericParser {
 	private static final String STREAM = "stream";
 	private static final String MESSAGE = "message";
-
+	private static final String AUTH = "auth";
 	protected ByteBuffer buffer;
 	protected Element element;
-
+	
+	private boolean uncompletedRead=false;
+	
 	// aalto
 	private AsyncXMLStreamReader<AsyncByteBufferFeeder> asyncXMLStreamReader;
 	private AsyncByteBufferFeeder feeder;
@@ -41,26 +43,27 @@ public class GenericParser {
 	}
 
 	public void parse() {
-
+		uncompletedRead=true;
 		try {
 			while (!feeder.needMoreInput()) {
+				uncompletedRead=false;
 				type = asyncXMLStreamReader.next();
 
 				System.out.println("OCURRIO TIPO: " + type);
 				switch (type) {
 
+				case XMLEvent.START_DOCUMENT:
 				case 257: {
 					// IGNORAR
 					break;
 				}
-				case XMLEvent.START_DOCUMENT:
-					System.out.println("start document");
-					break;
-				case XMLEvent.START_ELEMENT:
+
+				case XMLEvent.START_ELEMENT: {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
 					processStartElement();
 					break;
+				}
 				case XMLEvent.CHARACTERS: {
 					String str = asyncXMLStreamReader.getText().trim();
 					if (str.length() == 0)
@@ -82,18 +85,6 @@ public class GenericParser {
 				default:
 					break;
 
-				// case XMLEvent.START_ELEMENT: {
-				// QName qname = asyncXMLStreamReader.getName();
-				// if (qname.getLocalPart() == STREAM) {
-				//
-				// // processStreamElement(startElement);
-				// System.out.println(qname);
-				//
-				// }
-				//
-				// break;
-				// }
-
 				}
 			}
 
@@ -101,6 +92,8 @@ public class GenericParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if(!uncompletedRead)
+			buffer.clear();
 
 	}
 
@@ -110,8 +103,23 @@ public class GenericParser {
 	}
 
 	private void processEndElement() {
-		// TODO Auto-generated method stub
+		QName qname = asyncXMLStreamReader.getName();
+		String elementName = qname.getLocalPart();
+		switch (elementName) {
+		case STREAM: {
+			processStreamElementEnd();
+			break;
+		}
+		case MESSAGE: {
+			processMessageElementEnd();
+		}
+		case AUTH:{
+			processAuthElementEnd();
+		}
 
+		default:
+			break;
+		}
 	}
 
 	private void processStartElement() {
@@ -119,11 +127,14 @@ public class GenericParser {
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
 		case STREAM: {
-
+			processStreamElement();
 			break;
 		}
-		case MESSAGE:{
-			
+		case MESSAGE: {
+			processMessageElementStart();
+		}
+		case AUTH:{
+			processAuthElementStart();
 		}
 
 		default:
@@ -133,9 +144,17 @@ public class GenericParser {
 	}
 
 	// solo parar elemento STREAM:STREAM
-	protected void processStreamElement(StartElement startElement)
-			throws XMLStreamException {
+	protected abstract void processStreamElement();
 
-	}
+	// solo parar elemento /STREAM:STREAM
+	protected abstract void processStreamElementEnd();
+
+	protected abstract void processAuthElementStart();
+
+	protected abstract void processAuthElementEnd();
+
+	protected abstract void processMessageElementStart();
+
+	protected abstract void processMessageElementEnd();
 
 }

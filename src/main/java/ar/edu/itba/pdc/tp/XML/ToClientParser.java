@@ -21,21 +21,44 @@ public class ToClientParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElement(StartElement startElement) throws XMLStreamException {
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+	protected void processStreamElement() {
+		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
+	protected void processStreamElementEnd() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processAuthElementStart() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processAuthElementEnd() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processMessageElementStart() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processMessageElementEnd() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+
+	
 	
 
 }
