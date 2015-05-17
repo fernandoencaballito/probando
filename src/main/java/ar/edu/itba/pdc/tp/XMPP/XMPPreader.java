@@ -9,6 +9,7 @@ import static ar.edu.itba.pdc.tp.util.POP3Utils.asMultilines;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.ProcessBuilder.Redirect;
 import java.net.InetSocketAddress;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -73,7 +74,11 @@ class XMPPreader implements TCPEventHandler {
         }
         
 //        long bytesRead =writeChannel.read(readBuffer);
+        //hay que procesar este buffer antes de mandarlo!
+        //1-ver si me tengo que autenticar y hacerlo , luego hacer cambios sobre el
         long bytesRead =readChannel.read(readBuffer);
+        System.out.println("bytes leidos "+bytesRead);
+        System.out.println(readBuffer.getChar());
         
         if (bytesRead == -1) { // Did the other end close?
         	proxyState.closeChannels();
@@ -86,12 +91,18 @@ class XMPPreader implements TCPEventHandler {
             if(proxyState.getOriginChannel()==null){
             connectToOrigin(key, proxyState,"hola");
             }
+            negotiateFileTransfer(proxyState);
             
         }
         
         
         
     }
+
+
+	private void negotiateFileTransfer(XMPPproxyState proxyState) {
+		
+	}
 
 	private void connectToOrigin(SelectionKey key, XMPPproxyState proxyState,
 			String user) {

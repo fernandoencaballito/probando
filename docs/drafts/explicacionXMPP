@@ -1,0 +1,47 @@
+#EXPLICACION PROXY XMPP
+
+1)COMPILACION
+	para su funcionamiento el servidor proxy correspondiente al protocolo xmpp  se utilizaran los siguientes puertos
+	puerto 10002: utilizado por el servidor para atender a clientes comunes.
+	puerto 10001: utilizado por el servidor para atender a clientes de tipo administrador.
+	puerto 5222: utilizado por el servidor XMPP , en nuestro caso se opto por openfire.
+	--hablar de java 8 y la compilacion
+
+2)EJECUCION
+para su ejecucion 
+1-encender openfire con comando sudo apt-get install openfire
+2-conectarse a un cliente (ya se mediante psi ,pidgin) y configurar en opciones avanzadas el uso del proxy
+con puerto 10002 y el nombre del servidor proxy.
+3-conecarse con su cliente y enviar mensajes.
+
+
+
+
+
+
+
+3)GUIA INSTALACION
+para la utilizacion del servidor proxy primero debemos instalara un servidor xmpp que corre en Java , en nuestro caso vamos a instalar 
+Openfire 
+1-instalacion Openfire(servidor xmpp origen)
+ejecutar en consola el comando  $ sudo apt-get update
+chequar la version de Java correspondiente con  $ java -version
+en caso de retornar "los paquetes no han sido encontrados "  debemos instalar Java 8
+$ sudo add-apt-repository ppa:webupd8team/java
+$ sudo apt-get update
+$ sudo apt-get install oracle-java8-installer
+descargar Openfire con el comando $ wget -O openfire.deb http://www.igniterealtime.org/downloadServlet?filename=openfire/openfire_3.8.2_all.deb
+esto descargar el paquete  openfire.deb para instalarlo usar el comando  $ sudo dpkg --install openfire.deb
+Openfire ya ha sido istalado , para su configuracion desde cualquier browser entrar a la siguiente direccion  http://localhost:9090  y seguir las instrucciones de configuracion.
+
+3.1)CONFIGURACION BASICA
+1-Configuracion de base de datos
+en nuestro caso utilizaremos la base de datos default que provee el servidor.
+2-Propiedades del sistema
+en la pestaña administracion del servidor > propiedades del sistema 
+desactivar todas las propiedades del tipo STARTTLS, TLS, SSL y certificados de autenticacion.
+Agregar la propiedad sasl.mechs  con el valor PLAIN , guardar y reiniciar el servidor.
+De esta manera solo aceptaremos autenticacion del tipo plana.
+3-creacion y administracion de usuarios
+Por defecto Openfire nos creo un usuario de tipo admin.
+Para crear otro usuario ir a pestaña usuarios/grupos > crear nuevo usuario
