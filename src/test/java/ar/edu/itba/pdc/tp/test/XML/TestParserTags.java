@@ -80,7 +80,6 @@ public class TestParserTags {
 		parser.parse();
 
 		assertFalse(parser.isStreamElementStart());
-		buffer.clear();
 
 		String inFileName2 = "./src/test/resources/startingStreamFromClient.part2.in";
 		readFileIntoBuffer(inFileName2, buffer);
@@ -115,8 +114,9 @@ public class TestParserTags {
 		parser.parse();
 
 		assertFalse(parser.isStreamElementStart());
-		buffer.clear();
-
+		
+		
+		buffer.compact();
 		buffer.put(byteArrayPart2);
 
 		// SE TIENE QUE PASAR EL BUFFER A MODO Lectura
