@@ -7,7 +7,6 @@ Estructura del repositorio
 ├── binary 	//Contiene el archivo binario ejecutable del trabajo
 ├── docs	//Contiene el informe y la presentación.
 │   ├── drafts	//Contiene los borradores del informe y la carátula del trabajo ( la que se incluye en el sobre).
-│   ├── documentsDependencies.sh //Script que instala los programas necesarios para convertir el informe a pdf.
 ├── pom.xml	//archivo de maven
 ├── README.md		
 ├── scripts	//scripts empleados durante la fase de desarrollo.No es necesario correrlos para el correcto funcionamiento del trabajo.
@@ -18,6 +17,7 @@ Estructura del repositorio
 │   ├── mainScript.sh		//Script principal. Utiliza a los otros scripts para compilar y testear el trabajo.
 │   ├── smokeTest.sh		//Prueba el archivo ejecutable
 │   └──install	//Programas que se instalaron durante la fase de desarrollo.
+│   	├── documentsDependencies.sh //Script que instala los programas necesarios para convertir el informe a pdf.
 ├── src				//Archivos fuente del trabajo
 │   ├── main			
 │   │     	
