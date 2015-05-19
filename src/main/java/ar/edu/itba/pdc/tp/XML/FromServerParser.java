@@ -12,10 +12,10 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 
-public class ToServerParser extends GenericParser {
+public class FromServerParser extends GenericParser {
 
 	
-	public ToServerParser(ByteBuffer buf) throws XMLStreamException {
+	public FromServerParser(ByteBuffer buf) throws XMLStreamException {
 		super(buf);
 		// TODO Auto-generated constructor stub
 	}

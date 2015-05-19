@@ -13,16 +13,26 @@ import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-public class ToClientParser extends GenericParser {
-
+public class FromClientParser extends GenericParser {
+	private enum ClientState { CONNECTION_STABLISHED, AUTH_EXPECTED, AUTHENTICATED}
 	
-	public ToClientParser(ByteBuffer buf) throws XMLStreamException {
+	
+	private ClientState state;
+	
+	public FromClientParser(ByteBuffer buf) throws XMLStreamException {
 		super(buf);
+		state=ClientState.CONNECTION_STABLISHED;
 	}
 
 	@Override
 	protected void processStreamElement() {
-		// TODO Auto-generated method stub
+		if(state==ClientState.CONNECTION_STABLISHED){
+			
+			
+			
+		}else if(state==ClientState.AUTHENTICATED){
+			//ignorar
+		}
 		
 	}
 

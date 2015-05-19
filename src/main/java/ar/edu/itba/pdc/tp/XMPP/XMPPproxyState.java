@@ -17,17 +17,14 @@ class XMPPproxyState {
 	private static final int BUFF_SIZE = 4 * 1024;
 
 	private final ByteBuffer originBuffer = ByteBuffer.allocate(BUFF_SIZE);
-	private final ByteBuffer convertedOriginBuffer = ByteBuffer
-			.allocate(BUFF_SIZE);
+	
 	private final ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
 
 	private final SocketChannel clientChannel;
 	private SocketChannel originChannel = null;
 
-	private States state = States.AUTHENTICATION;
-	private XMPPline line = new XMPPline();
+	
 
-	private EmailConverter emailConverter = null;
 
 	XMPPproxyState(final SocketChannel clientChannel) {
 		this.clientChannel = clientChannel;
@@ -48,9 +45,6 @@ class XMPPproxyState {
 		this.originChannel = originChannel;
 	}
 
-	XMPPline getLine() {
-		return line;
-	}
 
 	SocketChannel getClientChannel() {
 		return clientChannel;
@@ -68,46 +62,18 @@ class XMPPproxyState {
 		return originBuffer;
 	}
 
-	public ByteBuffer getConvertedOriginBuffer() {
-		return convertedOriginBuffer;
-	}
 
-	States getState() {
-		return state;
-	}
 
-	void setState(States state) {
-		this.state = state;
-	}
 
-	void startEmailHeaderTransfer() {
-		this.convertedOriginBuffer.clear();
-		this.emailConverter = new EmailConverter();
-	}
 
-	EmailConverter getEmailConverter() {
-		return emailConverter;
-	}
 
-	void endEmailHeaderTransfer() {
-		this.emailConverter = null;
-	}
 
 	boolean isConnectedToOrigin() {
 		return originChannel != null && originChannel.isOpen()
 				&& originChannel.isConnected();
 	}
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this).append("clientBuffer", clientBuffer)
-				.append("originBuffer", originBuffer)
-				.append("convertedOriginBuffer", convertedOriginBuffer)
-				.append("clientChannel", clientChannel)
-				.append("originChannel", originChannel).append("state", state)
-				.append("line", line).toString();
-	}
-
+	
 	enum States {
 		EXPECT_USER_OK, EXPECT_PASS_OK, EXPECT_RETR_DATA, GREETING, TRANSACTION, QUITTING, AUTHENTICATION
 	}
@@ -128,12 +94,10 @@ class XMPPproxyState {
 	// *proxy's* write, that is, where the other end will *read*
 	ByteBuffer getWriteBuffer(final SocketChannel channel) {
 		if (clientChannel == channel) {
-			if (convertedOriginBuffer.position() > 0) { 
-				return convertedOriginBuffer;
-			} else {
+			
 				return originBuffer;
 			}
-		}
+		
 		if (originChannel == channel) {
 			return clientBuffer;
 		}
