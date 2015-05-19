@@ -12,6 +12,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 
+import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
+
 public class FromServerParser extends GenericParser {
 
 	
@@ -21,41 +23,42 @@ public class FromServerParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElement() {
+	protected void processStreamElement(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processStreamElementEnd() {
+	protected void processStreamElementEnd(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processAuthElementStart() {
+	protected void processAuthElementStart(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processAuthElementEnd() {
+	protected void processAuthElementEnd(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processMessageElementStart() {
+	protected void processMessageElementStart(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processMessageElementEnd() {
+	protected void processMessageElementEnd(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	
 	
 
 	

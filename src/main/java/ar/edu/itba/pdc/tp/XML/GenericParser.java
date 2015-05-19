@@ -7,6 +7,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
+
 import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
@@ -42,7 +44,7 @@ public abstract class GenericParser {
 		feeder.feedInput(buffer);
 	}
 
-	public void parse() {
+	public void parse(XMPPlistener listener) {
 		uncompletedRead=true;
 		try {
 			while (!feeder.needMoreInput()) {
@@ -61,7 +63,7 @@ public abstract class GenericParser {
 				case XMLEvent.START_ELEMENT: {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
-					processStartElement();
+					processStartElement(listener);
 					break;
 				}
 				case XMLEvent.CHARACTERS: {
@@ -76,11 +78,11 @@ public abstract class GenericParser {
 				case XMLEvent.END_ELEMENT:
 					System.out.println("end element: "
 							+ asyncXMLStreamReader.getName());
-					processEndElement();
+					processEndElement(listener);
 					break;
 				case XMLEvent.END_DOCUMENT:
 					System.out.println("end document");
-					processEndDocument();
+					processEndDocument(listener);
 					break;
 				default:
 					break;
@@ -97,24 +99,24 @@ public abstract class GenericParser {
 
 	}
 
-	private void processEndDocument() {
+	private void processEndDocument(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void processEndElement() {
+	private void processEndElement(XMPPlistener listener) {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
 		case STREAM: {
-			processStreamElementEnd();
+			processStreamElementEnd(listener);
 			break;
 		}
 		case MESSAGE: {
-			processMessageElementEnd();
+			processMessageElementEnd(listener);
 		}
 		case AUTH:{
-			processAuthElementEnd();
+			processAuthElementEnd(listener);
 		}
 
 		default:
@@ -122,19 +124,19 @@ public abstract class GenericParser {
 		}
 	}
 
-	private void processStartElement() {
+	private void processStartElement(XMPPlistener listener) {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
 		case STREAM: {
-			processStreamElement();
+			processStreamElement(listener);
 			break;
 		}
 		case MESSAGE: {
-			processMessageElementStart();
+			processMessageElementStart(listener);
 		}
 		case AUTH:{
-			processAuthElementStart();
+			processAuthElementStart(listener);
 		}
 
 		default:
@@ -144,17 +146,17 @@ public abstract class GenericParser {
 	}
 
 	// solo parar elemento STREAM:STREAM
-	protected abstract void processStreamElement();
+	protected abstract void processStreamElement(XMPPlistener listener);
 
 	// solo parar elemento /STREAM:STREAM
-	protected abstract void processStreamElementEnd();
+	protected abstract void processStreamElementEnd(XMPPlistener listener);
 
-	protected abstract void processAuthElementStart();
+	protected abstract void processAuthElementStart(XMPPlistener listener);
 
-	protected abstract void processAuthElementEnd();
+	protected abstract void processAuthElementEnd(XMPPlistener listener);
 
-	protected abstract void processMessageElementStart();
+	protected abstract void processMessageElementStart(XMPPlistener listener);
 
-	protected abstract void processMessageElementEnd();
+	protected abstract void processMessageElementEnd(XMPPlistener listener);
 
 }

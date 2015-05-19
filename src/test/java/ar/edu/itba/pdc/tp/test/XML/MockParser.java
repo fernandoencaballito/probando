@@ -6,6 +6,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 
 import ar.edu.itba.pdc.tp.XML.GenericParser;
+import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 
 public class MockParser extends GenericParser {
 
@@ -21,35 +22,35 @@ public class MockParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElement() {
+	protected void processStreamElement(XMPPlistener listener) {
 		this.streamElementStart = true;
 
 	}
 
 	@Override
-	protected void processStreamElementEnd() {
+	protected void processStreamElementEnd(XMPPlistener listener) {
 		streamElementEnd = true;
 
 	}
 
 	@Override
-	protected void processAuthElementStart() {
+	protected void processAuthElementStart(XMPPlistener listener) {
 		authElementStart = true;
 
 	}
 
 	@Override
-	protected void processAuthElementEnd() {
+	protected void processAuthElementEnd(XMPPlistener listener) {
 		authElementEnd = true;
 	}
 
 	@Override
-	protected void processMessageElementStart() {
+	protected void processMessageElementStart(XMPPlistener listener) {
 		messageElementStart = true;
 	}
 
 	@Override
-	protected void processMessageElementEnd() {
+	protected void processMessageElementEnd(XMPPlistener listener) {
 		messageElementEnd = true;
 	}
 

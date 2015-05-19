@@ -13,6 +13,8 @@ import javax.xml.stream.events.StartDocument;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
+
 public class FromClientParser extends GenericParser {
 	private enum ClientState { CONNECTION_STABLISHED, AUTH_EXPECTED, AUTHENTICATED}
 	
@@ -25,7 +27,7 @@ public class FromClientParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElement() {
+	protected void processStreamElement(XMPPlistener listener) {
 		if(state==ClientState.CONNECTION_STABLISHED){
 			
 			
@@ -37,31 +39,31 @@ public class FromClientParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElementEnd() {
+	protected void processStreamElementEnd(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processAuthElementStart() {
+	protected void processAuthElementStart(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processAuthElementEnd() {
+	protected void processAuthElementEnd(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processMessageElementStart() {
+	protected void processMessageElementStart(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processMessageElementEnd() {
+	protected void processMessageElementEnd(XMPPlistener listener) {
 		// TODO Auto-generated method stub
 		
 	}

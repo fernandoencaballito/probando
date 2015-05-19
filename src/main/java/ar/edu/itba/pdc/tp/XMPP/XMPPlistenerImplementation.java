@@ -1,31 +1,32 @@
 package ar.edu.itba.pdc.tp.XMPP;
 
-import ar.edu.itba.pdc.tp.XML.XMPPlistener;
 
 public class XMPPlistenerImplementation  implements XMPPlistener{
 
 	@Override
-	public void connectToOrigin() {
+	public void connectToOrigin(XMPPproxyState state) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void closeConnection() {
+	public void closeConnection(XMPPproxyState state) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void writeToOrigin(byte[] array) {
+	public void writeToOrigin(byte[] array, XMPPproxyState state) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void writeToClient(byte[] array) {
+	public void writeToClient(byte[] array, XMPPproxyState state) {
 		// TODO Auto-generated method stub
 		
 	}
+
+	
 
 }

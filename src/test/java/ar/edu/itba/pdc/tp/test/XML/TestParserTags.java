@@ -17,12 +17,13 @@ import org.junit.Test;
 
 import ar.edu.itba.pdc.tp.XML.ByteBufferInputStream;
 import ar.edu.itba.pdc.tp.XML.GenericParser;
+import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 
 public class TestParserTags {
 	private static final int BUFF_SIZE = 10 * 1024;
 	private ByteBuffer buffer;
 	private MockParser parser;
-
+	private XMPPlistener mockListener;
 	@Before
 	public void init() throws XMLStreamException {
 		buffer = ByteBuffer.allocate(BUFF_SIZE);
@@ -77,7 +78,7 @@ public class TestParserTags {
 		buffer.flip();
 //		MockParser parser2 = new MockParser(buffer);
 		parser.feed();
-		parser.parse();
+		parser.parse(mockListener);
 
 		assertFalse(parser.isStreamElementStart());
 
@@ -87,7 +88,7 @@ public class TestParserTags {
 		// SE TIENE QUE PASAR EL BUFFER A MODO Lectura
 		buffer.flip();
 		parser.feed();
-		parser.parse();
+		parser.parse(mockListener);
 		assertTrue(parser.isStreamElementStart());
 	}
 
@@ -111,7 +112,7 @@ public class TestParserTags {
 		buffer.flip();
 //		MockParser parser = new MockParser(buffer);
 
-		parser.parse();
+		parser.parse(mockListener);
 
 		assertFalse(parser.isStreamElementStart());
 		
@@ -122,7 +123,7 @@ public class TestParserTags {
 		// SE TIENE QUE PASAR EL BUFFER A MODO Lectura
 		buffer.flip();
 		parser.feed();
-		parser.parse();
+		parser.parse(mockListener);
 		assertTrue(parser.isStreamElementStart());
 	}
 
@@ -138,7 +139,7 @@ public class TestParserTags {
 		
 		
 		parser.feed();
-		parser.parse();
+		parser.parse(mockListener);
 	}
 
 	static void readFileIntoBuffer(String path, ByteBuffer buffer)
