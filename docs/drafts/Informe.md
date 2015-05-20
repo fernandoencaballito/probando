@@ -77,7 +77,7 @@ En el siguiente ejemplo se ve una sesión de este protocolo. En la misma se empl
 
 La especificación de la sintaxis de invocación de cada comando en formato ABNF (rfc 5234) es la siguiente:
 
-	PASS	= "PASSWORD" SP adminPassword CRLF;
+	PASS	= "PASS" SP adminPassword CRLF;
 	MET1	= "MET1" CRLF;
 	MET2	= "MET2" CRLF;
 	SET	= "SET" SP user SP originServer SP originPort CRLF; 
@@ -114,8 +114,6 @@ Dado que el nombre de usuario se encuentra en codificacion UTF-8, todas las lín
 # Ejemplos de testeo
 
 # Guia de instalación detallada y precisa.  
-
-#GUIA INSTALACION 
 
 La siguiente guía de instalación es válida para el sistema operativo Ubuntu 6.10 o 
 versiones superiores. 
