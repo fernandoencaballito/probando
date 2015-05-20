@@ -24,21 +24,15 @@ Estructura del repositorio
 │   └── test			//Archivos fuente para realizar testing.
 
 
+Nota sobre el directorio "binary"
+------------------------
+En este directorio ya se provee un binario ejecutable segun se solicita en el informe.Dentro de dicha carpeta se encuentra copiado el archivo de propiedades "proxyServer.properties".
+
 Compilacion del programa
 ------------------------
-
+Se debe situar en la raiz del proyecto (donde se encuentra el archivo "pom.xml") y se debe ejecutar el el comando "mvn package". Este comando del programa Maven crea un jar ejecutable de nombre "uber-tp-0.0.1-SNAPSHOT.jar" dentro de la carpeta target (en la raiz del proyecto).
 
 Ejecucion del programa
 ----------------------
-
-
-
-Servicio
-----------
- ultimo, los comandos para iniciar y parar el servicio desde consola son los siguientes:"sudo start pop3proxy" y "sudo stop pop3proxy".
-
-
-
-Protocolo de administrador
--------------------------
-Este protocolo solo admite la contraseña "password".
+Para ejecutar el programa se puede simplemente ejecutar el jar que se obtiene luego del paso anterior mediante el comando "sudo  java -jar uber-tp-0.0.1-SNAPSHOT.jar". En el mismo directorio que contenga el ejecutable debe estar el archivo "proxyServer.properties" (se encuentra en la raiz del proyecto); opcionalmente se le puede pasar como parámetro la ubicación del archivo de configuración de propiedades. 
+Ejemplo: ""sudo  java -jar uber-tp-0.0.1-SNAPSHOT.jar ./proxyServer.properties" 
