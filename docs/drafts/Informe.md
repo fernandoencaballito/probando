@@ -115,8 +115,6 @@ Dado que el nombre de usuario se encuentra en codificacion UTF-8, todas las lín
 
 # Guia de instalación detallada y precisa.  
 
-#GUIA INSTALACION 
-
 La siguiente guía de instalación es válida para el sistema operativo Ubuntu 6.10 o 
 versiones superiores. 
 Los pasos a seguir para la instalación son los siguientes: 
