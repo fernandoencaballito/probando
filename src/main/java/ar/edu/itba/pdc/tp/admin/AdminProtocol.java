@@ -207,6 +207,8 @@ public class AdminProtocol implements TCPProtocol {
         return ans;
     }
 
+    
+    //OJO: SOLO TOMA ASCII, ahora deberia tomar utf8
     private String prepareBuffer(ByteBuffer buffer) {
         String read = "";
 

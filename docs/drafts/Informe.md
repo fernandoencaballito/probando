@@ -115,6 +115,28 @@ Dado que el nombre de usuario se encuentra en codificacion UTF-8, todas las lín
 
 # Guia de instalación detallada y precisa.  
 
+#GUIA INSTALACION 
+
+La siguiente guía de instalación es válida para el sistema operativo Ubuntu 6.10 o 
+versiones superiores. 
+Los pasos a seguir para la instalación son los siguientes: 
+
+1. Para este trabajo practico se requiere la instalacion de java 8.
+En caso de que se lo tenga que instalar, utilizar en consola los siguientes comandos
+$ sudo add-apt-repository ppa:webupd8team/java
+$ sudo apt-get update
+$ sudo apt-get install oracle-java8-installer
+
+2. Instalar apache maven.
+3. Se debe situar en la raíz del proyecto (donde se encuentra el archivo "pom.xml") y se 
+debe ejecutar el el comando "mvn package". Este comando del programa Maven crea 
+un jar ejecutable de nombre uber-tp-0.0.1-SNAPSHOT.jar  dentro de la carpeta target 
+(en la raíz del proyecto).
+4. Copiar el archivo "XMPPproxy.conf" ( se encuentra en la raíz del proyecto)  en el 
+directorio "/etc/init".Luego modificar el archivo "pop3proxy.conf" recién copiado, 
+cambiando el valor que tiene asignada la variable JARPATH por la ubicación absoluta 
+en la que se encuentra el archivo jar que se obtiene al compilar el proyecto en maven. 
+
 # Instrucciones para la configuración.
 
 # Ejemplos de configuración y monitoreo.
