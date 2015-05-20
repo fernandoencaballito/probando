@@ -101,7 +101,7 @@ Para el caso los comandos "MET1" Y "MET2" el formato de la respuesta exitosa es 
 	métrica 	= *DIGIT; valor de la métrica.
 	
 	
-
+Dado que el nombre de usuario se encuentra en codificacion UTF-8, todas las líneas que se reciben se interpretan en este formato.
 
 # Problemas encontrados durante el diseño y la implementación
 
