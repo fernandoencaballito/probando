@@ -21,7 +21,7 @@ class XMPPWriter implements TCPEventHandler {
     }
 
     @Override
-    public void handle(SelectionKey key) throws IOException {
+    public void handle(SelectionKey key)  {
     	  /*
          * Channel is available for writing, and key is valid (i.e., client
          * channel not closed).
@@ -34,13 +34,21 @@ class XMPPWriter implements TCPEventHandler {
     	ByteBuffer buf = (ByteBuffer) proxyState.getWriteBuffer(channel);
         buf.flip(); // Prepare buffer for writing
         SocketChannel writeChannel = (SocketChannel) key.channel();
-        LOGGER.info(writeChannel.getLocalAddress() + " writing to " + writeChannel.getRemoteAddress());
-        writeChannel.write(buf);
+        try {
+			LOGGER.info(writeChannel.getLocalAddress() + " writing to " + writeChannel.getRemoteAddress());
+
+			writeChannel.write(buf);
+			
+	        buf.compact(); // Make room for more data to be read in
+	        proxyState.updateSubscription(key.selector());
+			
+		} catch (IOException e) {
+			LOGGER.error("Can't write on selected channel");
+		}
 //        if (!buf.hasRemaining()) { // Buffer completely written?
 //            // Nothing left, so no longer interested in writes
 //            key.interestOps(SelectionKey.OP_READ);
 //        }
-        buf.compact(); // Make room for more data to be read in
-        proxyState.updateSubscription(key.selector());
+
     }
 }

@@ -53,7 +53,7 @@ class XMPPreader implements TCPEventHandler {
     }
 
     @Override
-    public void handle(SelectionKey key) throws IOException {
+    public void handle(SelectionKey key)  {
        
     	final XMPPproxyState proxyState = (XMPPproxyState) key.attachment();
 
@@ -78,24 +78,30 @@ class XMPPreader implements TCPEventHandler {
 //        long bytesRead =writeChannel.read(readBuffer);
         //hay que procesar este buffer antes de mandarlo!
         //1-ver si me tengo que autenticar y hacerlo , luego hacer cambios sobre el
-        long bytesRead =readChannel.read(readBuffer);
-        System.out.println("bytes leidos "+bytesRead);
-        System.out.println(readBuffer.getChar());
-        
-        if (bytesRead == -1) { // Did the other end close?
-        	proxyState.closeChannels();
-        	reactor.unsubscribeChannel(proxyState.getClientChannel());
-            reactor.unsubscribeChannel(proxyState.getOriginChannel());
-        } else if (bytesRead > 0) {
-            // Indicate via key that reading are both of interest now.
-            //key.interestOps(SelectionKey.OP_READ );
-            proxyState.updateSubscription(key.selector());
-            if(proxyState.getOriginChannel()==null){
-            connectToOrigin(key, proxyState,"hola");
-            }
-            negotiateFileTransfer(proxyState);
-            
-        }
+        long bytesRead;
+		try {
+			bytesRead = readChannel.read(readBuffer);
+			  System.out.println("bytes leidos "+bytesRead);
+		        System.out.println(readBuffer.getChar());
+		        
+		        if (bytesRead == -1) { // Did the other end close?
+		        	proxyState.closeChannels();
+		        	reactor.unsubscribeChannel(proxyState.getClientChannel());
+		            reactor.unsubscribeChannel(proxyState.getOriginChannel());
+		        } else if (bytesRead > 0) {
+		            // Indicate via key that reading are both of interest now.
+		            //key.interestOps(SelectionKey.OP_READ );
+		            proxyState.updateSubscription(key.selector());
+		            if(proxyState.getOriginChannel()==null){
+		            connectToOrigin(key, proxyState,"hola");
+		            }
+		            negotiateFileTransfer(proxyState);
+		            
+		        }
+		} catch (IOException e) {
+			LOGGER.error("Can't read on selected channel");
+		}
+      
         
         
         
