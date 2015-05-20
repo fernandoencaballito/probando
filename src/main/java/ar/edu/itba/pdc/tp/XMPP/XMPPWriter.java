@@ -31,10 +31,10 @@ class XMPPWriter implements TCPEventHandler {
     	final XMPPproxyState proxyState = (XMPPproxyState) key.attachment();
         
     	final SocketChannel channel = (SocketChannel) key.channel();
-    	
     	ByteBuffer buf = (ByteBuffer) proxyState.getWriteBuffer(channel);
         buf.flip(); // Prepare buffer for writing
         SocketChannel writeChannel = (SocketChannel) key.channel();
+        LOGGER.info(writeChannel.getLocalAddress() + " writing to " + writeChannel.getRemoteAddress());
         writeChannel.write(buf);
 //        if (!buf.hasRemaining()) { // Buffer completely written?
 //            // Nothing left, so no longer interested in writes
