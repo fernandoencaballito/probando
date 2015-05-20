@@ -98,23 +98,19 @@ public class TCPReactorImpl implements TCPReactor {
 			if (protocolHandler != null) {
 
 				if (key.isValid() && key.isAcceptable()) {
-					System.out.println("entro accept");
 					protocolHandler.handleAccept(key);
 				}
 
 				if (key.isValid() && key.isConnectable()) {
 					protocolHandler.handleConnect(key);
-					System.out.println("entro connect");
 				}
 
 				if (key.isValid() && key.isReadable()) {
 					protocolHandler.handleRead(key);
-					System.out.println("entro read");
 				}
 
 				if (key.isValid() && key.isWritable()) {
 					protocolHandler.handleWrite(key);
-					System.out.println("entro write");
 				}
 			}
 			keyIter.remove(); // remove from set of selected keys

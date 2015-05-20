@@ -73,6 +73,8 @@ class XMPPreader implements TCPEventHandler {
         	
         }
         
+        
+        
 //        long bytesRead =writeChannel.read(readBuffer);
         //hay que procesar este buffer antes de mandarlo!
         //1-ver si me tengo que autenticar y hacerlo , luego hacer cambios sobre el
