@@ -126,6 +126,32 @@ public class TestParserTags {
 		parser.parse(mockListener);
 		assertTrue(parser.isStreamElementStart());
 	}
+	
+	@Test
+	public void testPartialRead3() throws IOException, XMLStreamException {
+		buffer.clear();
+		String inFileName1 = "./src/test/resources/messageElementStart.part1";
+		readFileIntoBuffer(inFileName1, buffer);
+		assertTrue(buffer.position() > 0);
+
+		// SE TIENE QUE PASAR EL BUFFER A MODO LECTURA
+		buffer.flip();
+//		MockParser parser2 = new MockParser(buffer);
+		parser.feed();
+		parser.parse(mockListener);
+
+		assertTrue(parser.isMessageElementStart());
+		assertFalse(parser.isMessage_bodySTART());
+		String inFileName2 = "./src/test/resources/messageElementStart.part2";
+		readFileIntoBuffer(inFileName2, buffer);
+
+		// SE TIENE QUE PASAR EL BUFFER A MODO Lectura
+		buffer.flip();
+		parser.feed();
+		parser.parse(mockListener);
+		assertTrue(parser.isMessageElementStart());
+		assertTrue(parser.isMessage_bodySTART());
+	}
 
 	private void genericTagTestInit(String fileName) throws IOException,
 			XMLStreamException {

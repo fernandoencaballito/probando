@@ -16,7 +16,8 @@ public class MockParser extends GenericParser {
 	private boolean authElementEnd = false;
 	private boolean messageElementStart = false;
 	private boolean messageElementEnd = false;
-
+	private boolean message_bodySTART=false;
+	private boolean message_bodyEND=false;
 	public MockParser(ByteBuffer buf) throws XMLStreamException {
 		super(buf);
 	}
@@ -49,6 +50,14 @@ public class MockParser extends GenericParser {
 		messageElementStart = true;
 	}
 
+	public boolean isMessage_bodySTART() {
+		return message_bodySTART;
+	}
+
+	public boolean isMessage_bodyEND() {
+		return message_bodyEND;
+	}
+
 	@Override
 	protected void processMessageElementEnd(XMPPlistener listener) {
 		messageElementEnd = true;
@@ -76,6 +85,12 @@ public class MockParser extends GenericParser {
 
 	public boolean isMessageElementEnd() {
 		return messageElementEnd;
+	}
+
+	@Override
+	protected void processMessage_bodyStart() {
+		message_bodySTART=true;
+		
 	}
 
 }

@@ -15,6 +15,7 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
 public abstract class GenericParser {
+	private static final String BODY = "body";
 	private static final String STREAM = "stream";
 	private static final String MESSAGE = "message";
 	private static final String AUTH = "auth";
@@ -134,9 +135,15 @@ public abstract class GenericParser {
 		}
 		case MESSAGE: {
 			processMessageElementStart(listener);
+			break;
 		}
 		case AUTH:{
 			processAuthElementStart(listener);
+			break;
+		}
+		case BODY:{
+			processMessage_bodyStart();
+			break;
 		}
 
 		default:
@@ -158,5 +165,5 @@ public abstract class GenericParser {
 	protected abstract void processMessageElementStart(XMPPlistener listener);
 
 	protected abstract void processMessageElementEnd(XMPPlistener listener);
-
+	protected abstract void processMessage_bodyStart();
 }
