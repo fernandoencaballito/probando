@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -216,13 +217,9 @@ public class AdminProtocol implements TCPProtocol {
         int size = buffer.limit() - buffer.position();
         byte[] array = new byte[size];
         buffer.get(array);
-        try {
-            if (buffer.limit() != 0) {
-                read = new String(array, 0, size, "US-ASCII");
-            }
-        } catch (UnsupportedEncodingException e) {
-
-        }
+        if (buffer.limit() != 0) {
+		    read = new String(array, 0, size, Charset.forName("UTF-8"));
+		}
         return read;
     }
 
