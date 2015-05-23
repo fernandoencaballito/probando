@@ -150,7 +150,7 @@ public class AdminProtocol implements TCPProtocol {
             } else {
                 // no se ingreso correctamente el comando PASS
                 ans = INCORRECT_COMMAND;
-                LOGGER.info("Incorrect command: " + split[0]);
+                LOGGER.info("Incorrect command: "/* + split[0]*/);
             }
         } else if (stateEnum == AdminStateEnum.TRANSACTION) {
             LOGGER.info("Command: " + split[0]);
