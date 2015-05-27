@@ -13,7 +13,7 @@ import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
-
+import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 public abstract class GenericParser {
 	private static final String BODY = "body";
 	private static final String STREAM = "stream";
@@ -29,6 +29,10 @@ public abstract class GenericParser {
 	private AsyncByteBufferFeeder feeder;
 
 	private int type;
+	
+	
+	private static final String  START_DOCUMENT="<?xml version='1.0' encoding='UTF-8'?>";
+	
 
 	public GenericParser(ByteBuffer buf) throws XMLStreamException {
 
@@ -42,11 +46,14 @@ public abstract class GenericParser {
 	}
 
 	public void feed() throws XMLStreamException {
+		if(feeder.needMoreInput())
 		feeder.feedInput(buffer);
+		
 	}
 
-	public void parse(XMPPlistener listener) {
+	public void parse(XMPPproxyState state) {
 		uncompletedRead=true;
+		
 		try {
 			while (!feeder.needMoreInput()) {
 				uncompletedRead=false;
@@ -64,7 +71,7 @@ public abstract class GenericParser {
 				case XMLEvent.START_ELEMENT: {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
-					processStartElement(listener);
+					processStartElement(state);
 					break;
 				}
 				case XMLEvent.CHARACTERS: {
@@ -79,11 +86,11 @@ public abstract class GenericParser {
 				case XMLEvent.END_ELEMENT:
 					System.out.println("end element: "
 							+ asyncXMLStreamReader.getName());
-					processEndElement(listener);
+					processEndElement();
 					break;
 				case XMLEvent.END_DOCUMENT:
 					System.out.println("end document");
-					processEndDocument(listener);
+					processEndDocument();
 					break;
 				default:
 					break;
@@ -95,29 +102,30 @@ public abstract class GenericParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if(!uncompletedRead)
+		if(!uncompletedRead && buffer.position()==0)
 			buffer.clear();
 
 	}
 
-	private void processEndDocument(XMPPlistener listener) {
+	
+	private void processEndDocument() {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void processEndElement(XMPPlistener listener) {
+	private void processEndElement() {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
 		case STREAM: {
-			processStreamElementEnd(listener);
+			processStreamElementEnd();
 			break;
 		}
 		case MESSAGE: {
-			processMessageElementEnd(listener);
+			processMessageElementEnd();
 		}
 		case AUTH:{
-			processAuthElementEnd(listener);
+			processAuthElementEnd();
 		}
 
 		default:
@@ -125,20 +133,20 @@ public abstract class GenericParser {
 		}
 	}
 
-	private void processStartElement(XMPPlistener listener) {
+	private void processStartElement(XMPPproxyState state) {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
 		case STREAM: {
-			processStreamElement(listener);
+			processStreamElement(state);
 			break;
 		}
 		case MESSAGE: {
-			processMessageElementStart(listener);
+			processMessageElementStart();
 			break;
 		}
 		case AUTH:{
-			processAuthElementStart(listener);
+			processAuthElementStart();
 			break;
 		}
 		case BODY:{
@@ -153,17 +161,17 @@ public abstract class GenericParser {
 	}
 
 	// solo parar elemento STREAM:STREAM
-	protected abstract void processStreamElement(XMPPlistener listener);
+	protected abstract void processStreamElement(XMPPproxyState state);
 
 	// solo parar elemento /STREAM:STREAM
-	protected abstract void processStreamElementEnd(XMPPlistener listener);
+	protected abstract void processStreamElementEnd();
 
-	protected abstract void processAuthElementStart(XMPPlistener listener);
+	protected abstract void processAuthElementStart();
 
-	protected abstract void processAuthElementEnd(XMPPlistener listener);
+	protected abstract void processAuthElementEnd();
 
-	protected abstract void processMessageElementStart(XMPPlistener listener);
+	protected abstract void processMessageElementStart();
 
-	protected abstract void processMessageElementEnd(XMPPlistener listener);
+	protected abstract void processMessageElementEnd();
 	protected abstract void processMessage_bodyStart();
 }

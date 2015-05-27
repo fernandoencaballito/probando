@@ -2,6 +2,7 @@ package ar.edu.itba.pdc.tp.XMPP;
 
 import static ar.edu.itba.pdc.tp.util.NIOUtils.closeQuietly;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -9,26 +10,32 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import ar.edu.itba.pdc.tp.XML.FromClientParser;
+import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.email.EmailConverter;
 
-class XMPPproxyState {
+public class XMPPproxyState {
 	private static final int BUFF_SIZE = 4 * 1024;
 
-	private final ByteBuffer originBuffer = ByteBuffer.allocate(BUFF_SIZE);
+	private  ByteBuffer originBuffer ;
 	
-	private final ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+	private  ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
 
 	private final SocketChannel clientChannel;
 	private SocketChannel originChannel = null;
 
+	private GenericParser clientParser;
 	
+	private GenericParser serverParser;
 
 
-	XMPPproxyState(final SocketChannel clientChannel) {
+	XMPPproxyState(final SocketChannel clientChannel) throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
-	}
+			}
 
 	
 	void closeChannels() throws IOException {
@@ -109,19 +116,19 @@ class XMPPproxyState {
 		int originFlags = 0;
 		int clientFlags = 0;
 
-		if (originBuffer.hasRemaining()) {
+		if (originBuffer!=null && originBuffer.hasRemaining()) {
 			originFlags |= SelectionKey.OP_READ;
 		}
 
-		if (clientBuffer.hasRemaining()) {
+		if (clientBuffer!=null && clientBuffer.hasRemaining()) {
 			clientFlags |= SelectionKey.OP_READ;
 		}
 
-		if (clientBuffer.position() > 0) {
+		if (clientBuffer!=null && clientBuffer.position() > 0) {
 			originFlags |= SelectionKey.OP_WRITE;
 		}
 
-		if (originBuffer.position() > 0 ) {
+		if (originBuffer!=null && originBuffer.position() > 0 ) {
 			clientFlags |= SelectionKey.OP_WRITE;
 		}
 
@@ -129,5 +136,21 @@ class XMPPproxyState {
 		if (isConnectedToOrigin()) {
 			originChannel.register(selector, originFlags, this);
 		}
+	}
+
+
+	public GenericParser getClientParser() throws FileNotFoundException, XMLStreamException {
+		if(clientParser==null)
+			this.clientParser=new FromClientParser(clientBuffer);
+		
+		return clientParser;
+		
+	}
+	
+	
+
+
+	public GenericParser getServerParser() {
+		return serverParser;
 	}
 }

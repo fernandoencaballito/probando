@@ -23,37 +23,43 @@ public class FromServerParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElement(XMPPlistener listener) {
+	protected void processStreamElement() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processStreamElementEnd(XMPPlistener listener) {
+	protected void processStreamElementEnd(){
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processAuthElementStart(XMPPlistener listener) {
+	protected void processAuthElementStart() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processAuthElementEnd(XMPPlistener listener) {
+	protected void processAuthElementEnd() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processMessageElementStart(XMPPlistener listener) {
+	protected void processMessageElementStart() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processMessageElementEnd(XMPPlistener listener) {
+	protected void processMessageElementEnd() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processMessage_bodyStart() {
 		// TODO Auto-generated method stub
 		
 	}
