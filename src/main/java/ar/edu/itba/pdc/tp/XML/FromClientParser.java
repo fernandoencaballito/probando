@@ -20,7 +20,8 @@ import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 
 public class FromClientParser extends GenericParser {
-	private enum ClientState { CONNECTION_STABLISHED, AUTH_EXPECTED, AUTHENTICATED}
+	private enum ClientState { CONNECTION_STABLISHED, AUTH_EXPECTED, AUTH_VALUE_EXPECTED,AUTH_END_EXPECTED,
+		CONNECTING_TO_ORIGIN,CONNECTED_TO_ORIGIN};
 	
 	
 	private ClientState state;
@@ -49,8 +50,8 @@ public class FromClientParser extends GenericParser {
 		if(state==ClientState.CONNECTION_STABLISHED){
 			
 			XMPPlistener.writeToClient(INITIAL_TAG, proxyState);
-			
-		}else if(state==ClientState.AUTHENTICATED){
+			state=ClientState.AUTH_EXPECTED;
+		}else if(state==ClientState.CONNECTED_TO_ORIGIN){
 			//ignorar
 		}
 		
@@ -64,10 +65,15 @@ public class FromClientParser extends GenericParser {
 
 	@Override
 	protected void processAuthElementStart() {
-		// TODO Auto-generated method stub
+		if(state==ClientState.AUTH_EXPECTED){
+			state=ClientState.AUTH_VALUE_EXPECTED;
+		}else{
+			//error
+		}
 		
 	}
-
+	
+	
 	@Override
 	protected void processAuthElementEnd() {
 		// TODO Auto-generated method stub
@@ -89,6 +95,15 @@ public class FromClientParser extends GenericParser {
 	@Override
 	protected void processMessage_bodyStart() {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processCharacters() {
+		if(state==ClientState.AUTH_VALUE_EXPECTED){
+			//se tiene el usuario y la contraseña de autenticación
+			
+		}
 		
 	}
 

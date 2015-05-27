@@ -102,11 +102,11 @@ public class XMPPproxyState {
 	ByteBuffer getWriteBuffer(final SocketChannel channel) {
 		if (clientChannel == channel) {
 			
-				return originBuffer;
+				return clientBuffer;
 			}
 		
 		if (originChannel == channel) {
-			return clientBuffer;
+			return originBuffer;
 		}
 		throw new IllegalArgumentException("Unknown socket");
 	}
@@ -116,21 +116,21 @@ public class XMPPproxyState {
 		int originFlags = 0;
 		int clientFlags = 0;
 
-		if (originBuffer!=null && originBuffer.hasRemaining()) {
-			originFlags |= SelectionKey.OP_READ;
-		}
+//		if (originBuffer!=null && originBuffer.hasRemaining()) {
+//			originFlags |= SelectionKey.OP_READ;
+//		}
 
 		if (clientBuffer!=null && clientBuffer.hasRemaining()) {
 			clientFlags |= SelectionKey.OP_READ;
 		}
 
 		if (clientBuffer!=null && clientBuffer.position() > 0) {
-			originFlags |= SelectionKey.OP_WRITE;
-		}
-
-		if (originBuffer!=null && originBuffer.position() > 0 ) {
 			clientFlags |= SelectionKey.OP_WRITE;
 		}
+
+//		if (originBuffer!=null && originBuffer.position() > 0 ) {
+//			clientFlags |= SelectionKey.OP_WRITE;
+//		}
 
 		clientChannel.register(selector, clientFlags, this);
 		if (isConnectedToOrigin()) {

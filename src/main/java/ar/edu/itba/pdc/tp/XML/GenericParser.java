@@ -174,4 +174,6 @@ public abstract class GenericParser {
 
 	protected abstract void processMessageElementEnd();
 	protected abstract void processMessage_bodyStart();
+	
+	protected abstract void processCharacters();
 }

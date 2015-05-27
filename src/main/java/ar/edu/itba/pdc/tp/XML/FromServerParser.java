@@ -13,6 +13,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
+import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 
 public class FromServerParser extends GenericParser {
 
@@ -23,13 +24,13 @@ public class FromServerParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElement() {
+	protected void processStreamElement(XMPPproxyState state) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	protected void processStreamElementEnd(){
+	protected void processStreamElementEnd() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -63,6 +64,14 @@ public class FromServerParser extends GenericParser {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	protected void processCharacters() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
 
 	
 	
