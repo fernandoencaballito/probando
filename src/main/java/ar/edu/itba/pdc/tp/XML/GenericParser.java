@@ -1,81 +1,176 @@
 package ar.edu.itba.pdc.tp.XML;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Iterator;
+import java.nio.ByteBuffer;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
+
+import com.fasterxml.aalto.AsyncByteBufferFeeder;
+import com.fasterxml.aalto.AsyncXMLInputFactory;
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+import com.fasterxml.aalto.stax.InputFactoryImpl;
+
+import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
+
 public abstract class GenericParser {
+	private static final String BODY = "body";
 	private static final String STREAM = "stream";
 	private static final String MESSAGE = "message";
+	private static final String AUTH = "auth";
+	protected ByteBuffer buffer;
 
-	protected InputStream in;
-	protected OutputStream out;
-	protected Element element;
+	private boolean uncompletedRead = false;
 
-	private XMLInputFactory inputFactory;
-	private XMLEventReader eventReader;
+	// aalto
+	private AsyncXMLStreamReader<AsyncByteBufferFeeder> asyncXMLStreamReader;
+	private AsyncByteBufferFeeder feeder;
 
-	public GenericParser(InputStream in, OutputStream out) {
+	private int type;
 
-		this.in = in;
-		this.out = out;
+	public GenericParser(ByteBuffer buf) throws XMLStreamException {
+
+		this.buffer = buf;
+		AsyncXMLInputFactory xmlInputFactory = new InputFactoryImpl();
+
+		asyncXMLStreamReader = xmlInputFactory.createAsyncFor(buf);
+		feeder = asyncXMLStreamReader.getInputFeeder();
+
+		type = 0;
+	}
+
+	public void feed() throws XMLStreamException {
+		if (feeder.needMoreInput())
+			feeder.feedInput(buffer);
+
+	}
+
+	public void parse(XMPPproxyState state) {
+		uncompletedRead = true;
 
 		try {
-			// First, create a new XMLInputFactory
-			inputFactory = XMLInputFactory.newInstance();
-			// Setup a new eventReader
-			eventReader = inputFactory.createXMLEventReader(in);
-			
-			element = null;
+			while (!feeder.needMoreInput()) {
+				uncompletedRead = false;
+				type = asyncXMLStreamReader.next();
+
+				System.out.println("OCURRIO TIPO: " + type);
+				switch (type) {
+
+				case XMLEvent.START_DOCUMENT:
+				case 257: {
+					// IGNORAR
+					break;
+				}
+
+				case XMLEvent.START_ELEMENT: {
+					System.out.println("start element: "
+							+ asyncXMLStreamReader.getName());
+					processStartElement(state);
+					break;
+				}
+				case XMLEvent.CHARACTERS: {
+					String str = asyncXMLStreamReader.getText().trim();
+					if (str.length() == 0)
+						break;// ignorar
+
+					System.out.println("characters :" + str);
+					processCharacters(str,state);
+					break;
+				}
+				case XMLEvent.END_ELEMENT:
+					System.out.println("end element: "
+							+ asyncXMLStreamReader.getName());
+					processEndElement();
+					break;
+				case XMLEvent.END_DOCUMENT:
+					System.out.println("end document");
+					processEndDocument();
+					break;
+				default:
+					break;
+
+				}
+			}
+
 		} catch (XMLStreamException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if (!uncompletedRead && buffer.position() == 0)
+			buffer.clear();
+
 	}
 
-	public void parse() {
-		try {
-			while (eventReader.hasNext()) {
-				XMLEvent event=null;
-				try{
-				event = eventReader.nextEvent();
-				}catch(NullPointerException e){
-					e.printStackTrace();
-				}
-				if (event.isStartElement()) {
-					
-					StartElement startElement = event.asStartElement();
-					System.out.println(startElement.getName().getLocalPart());
-					// If we have an item element, we create a new element
-					if (startElement.getName().getLocalPart() == (STREAM)) {
+	private void processEndDocument() {
+		// TODO Auto-generated method stub
 
-						processStreamElement(startElement);
+	}
 
-					}
+	private void processEndElement() {
+		QName qname = asyncXMLStreamReader.getName();
+		String elementName = qname.getLocalPart();
+		switch (elementName) {
+		case STREAM: {
+			processStreamElementEnd();
+			break;
+		}
+		case MESSAGE: {
+			processMessageElementEnd();
+		}
+		case AUTH: {
+			processAuthElementEnd();
+		}
 
-				}
-				// If we reach the end of an item element, we add it to the list
-				if (event.isEndElement()) {
-					EndElement endElement = event.asEndElement();
-					if (endElement.getName().getLocalPart() == (STREAM)) {
-
-					}
-				}
-
-			}
-		} catch (XMLStreamException e) {
-			
+		default:
+			break;
 		}
 	}
 
-	protected abstract void processStreamElement(StartElement startElement) throws XMLStreamException;
+	private void processStartElement(XMPPproxyState state) {
+		QName qname = asyncXMLStreamReader.getName();
+		String elementName = qname.getLocalPart();
+		switch (elementName) {
+		case STREAM: {
+			processStreamElement(state);
+			break;
+		}
+		case MESSAGE: {
+			processMessageElementStart();
+			break;
+		}
+		case AUTH: {
+			processAuthElementStart();
+			break;
+		}
+		case BODY: {
+			processMessage_bodyStart();
+			break;
+		}
 
+		default:
+			break;
+		}
+
+	}
+
+	// solo parar elemento STREAM:STREAM
+	protected abstract void processStreamElement(XMPPproxyState state);
+
+	// solo parar elemento /STREAM:STREAM
+	protected abstract void processStreamElementEnd();
+
+	protected abstract void processAuthElementStart();
+
+	protected abstract void processAuthElementEnd();
+
+	protected abstract void processMessageElementStart();
+
+	protected abstract void processMessageElementEnd();
+
+	protected abstract void processMessage_bodyStart();
+
+	protected abstract void processCharacters(String str,XMPPproxyState proxyState);
 }
