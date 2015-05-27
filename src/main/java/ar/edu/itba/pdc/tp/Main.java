@@ -19,7 +19,7 @@ import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 public class Main {
 	// nombre del archivo de propiedades
 
-	private static String PROPERTIES_FILENAME = "./proxyServer.properties";
+	private static String PROPERTIES_FILENAME = "./properties/proxyServer.properties";
 
 	private static short ADMIN_PORT;
 	private static short PROXY_SERVER_PORT;

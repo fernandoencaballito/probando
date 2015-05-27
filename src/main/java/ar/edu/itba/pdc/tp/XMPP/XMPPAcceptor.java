@@ -9,6 +9,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.log4j.Logger;
 
 import ar.edu.itba.pdc.tp.admin.AdminModule;
@@ -37,21 +39,23 @@ class XMPPAcceptor implements TCPEventHandler {
         clntChan.configureBlocking(false); // Must be nonblocking to register
         // Register the selector with new channel for read and attach byte
         // buffer
-        XMPPproxyState state=new XMPPproxyState(clntChan);
+        XMPPproxyState state=null;
+		try {
+			state = new XMPPproxyState(clntChan);
+		} catch (XMLStreamException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         clntChan.register(key.selector(), SelectionKey.OP_READ, state);
         clntChan.configureBlocking(false);
         //
-       SocketChannel origin = SocketChannel.open();
-        origin.configureBlocking(false);
-        /*
-        origin.connect(adminModule.getOriginAddressForUser(null));
-        origin.finishConnect();
-        state.setOriginChannel(origin);*/
-        //
+//       SocketChannel origin = SocketChannel.open();
+//        origin.configureBlocking(false);
+//        
         state.updateSubscription(key.selector());
 
         reactor.subscribeChannel(clntChan, parent);
-        reactor.subscribeChannel(origin, parent);
+//        reactor.subscribeChannel(origin, parent);
         
     }
 }

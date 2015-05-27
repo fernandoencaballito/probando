@@ -2,6 +2,7 @@ package ar.edu.itba.pdc.tp.XMPP;
 
 import static ar.edu.itba.pdc.tp.util.NIOUtils.closeQuietly;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
@@ -9,29 +10,33 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import ar.edu.itba.pdc.tp.XML.FromClientParser;
+import ar.edu.itba.pdc.tp.XML.GenericParser;
+import ar.edu.itba.pdc.tp.XML.User;
 import ar.edu.itba.pdc.tp.email.EmailConverter;
 
-class XMPPproxyState {
+public class XMPPproxyState {
 	private static final int BUFF_SIZE = 4 * 1024;
 
-	private final ByteBuffer originBuffer = ByteBuffer.allocate(BUFF_SIZE);
-	private final ByteBuffer convertedOriginBuffer = ByteBuffer
-			.allocate(BUFF_SIZE);
-	private final ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+	private  ByteBuffer originBuffer ;
+	
+	private  ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
 
 	private final SocketChannel clientChannel;
 	private SocketChannel originChannel = null;
 
-	private States state = States.AUTHENTICATION;
-	private XMPPline line = new XMPPline();
+	private GenericParser clientParser;
+	
+	private GenericParser serverParser;
+	private User user;
 
-	private EmailConverter emailConverter = null;
-
-	XMPPproxyState(final SocketChannel clientChannel) {
+	XMPPproxyState(final SocketChannel clientChannel) throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
-	}
+			}
 
 	
 	void closeChannels() throws IOException {
@@ -48,9 +53,6 @@ class XMPPproxyState {
 		this.originChannel = originChannel;
 	}
 
-	XMPPline getLine() {
-		return line;
-	}
 
 	SocketChannel getClientChannel() {
 		return clientChannel;
@@ -68,46 +70,18 @@ class XMPPproxyState {
 		return originBuffer;
 	}
 
-	public ByteBuffer getConvertedOriginBuffer() {
-		return convertedOriginBuffer;
-	}
 
-	States getState() {
-		return state;
-	}
 
-	void setState(States state) {
-		this.state = state;
-	}
 
-	void startEmailHeaderTransfer() {
-		this.convertedOriginBuffer.clear();
-		this.emailConverter = new EmailConverter();
-	}
 
-	EmailConverter getEmailConverter() {
-		return emailConverter;
-	}
 
-	void endEmailHeaderTransfer() {
-		this.emailConverter = null;
-	}
 
 	boolean isConnectedToOrigin() {
 		return originChannel != null && originChannel.isOpen()
 				&& originChannel.isConnected();
 	}
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this).append("clientBuffer", clientBuffer)
-				.append("originBuffer", originBuffer)
-				.append("convertedOriginBuffer", convertedOriginBuffer)
-				.append("clientChannel", clientChannel)
-				.append("originChannel", originChannel).append("state", state)
-				.append("line", line).toString();
-	}
-
+	
 	enum States {
 		EXPECT_USER_OK, EXPECT_PASS_OK, EXPECT_RETR_DATA, GREETING, TRANSACTION, QUITTING, AUTHENTICATION
 	}
@@ -128,14 +102,12 @@ class XMPPproxyState {
 	// *proxy's* write, that is, where the other end will *read*
 	ByteBuffer getWriteBuffer(final SocketChannel channel) {
 		if (clientChannel == channel) {
-			if (convertedOriginBuffer.position() > 0) { 
-				return convertedOriginBuffer;
-			} else {
-				return originBuffer;
+			
+				return clientBuffer;
 			}
-		}
+		
 		if (originChannel == channel) {
-			return clientBuffer;
+			return originBuffer;
 		}
 		throw new IllegalArgumentException("Unknown socket");
 	}
@@ -145,25 +117,52 @@ class XMPPproxyState {
 		int originFlags = 0;
 		int clientFlags = 0;
 
-		if (originBuffer.hasRemaining()) {
-			originFlags |= SelectionKey.OP_READ;
-		}
+//		if (originBuffer!=null && originBuffer.hasRemaining()) {
+//			originFlags |= SelectionKey.OP_READ;
+//		}
 
-		if (clientBuffer.hasRemaining()) {
+		if (clientBuffer!=null && clientBuffer.hasRemaining()) {
 			clientFlags |= SelectionKey.OP_READ;
 		}
 
-		if (clientBuffer.position() > 0) {
-			originFlags |= SelectionKey.OP_WRITE;
-		}
-
-		if (originBuffer.position() > 0 ) {
+		if (clientBuffer!=null && clientBuffer.position() > 0) {
 			clientFlags |= SelectionKey.OP_WRITE;
 		}
+
+//		if (originBuffer!=null && originBuffer.position() > 0 ) {
+//			clientFlags |= SelectionKey.OP_WRITE;
+//		}
 
 		clientChannel.register(selector, clientFlags, this);
 		if (isConnectedToOrigin()) {
 			originChannel.register(selector, originFlags, this);
 		}
+	}
+
+
+	public GenericParser getClientParser() throws FileNotFoundException, XMLStreamException {
+		if(clientParser==null)
+			this.clientParser=new FromClientParser(clientBuffer);
+		
+		return clientParser;
+		
+	}
+	
+	
+
+
+	public GenericParser getServerParser() {
+		return serverParser;
+	}
+
+
+	public void setUser(User user) {
+		this.user=user;
+		
+	}
+	
+	public String getUserName(){
+		return this.user.getUsername();
+		
 	}
 }
