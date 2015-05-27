@@ -30,7 +30,7 @@ public class AdminProtocol implements TCPProtocol {
     private static final String MULTIPLEXING_ON_MSG = "+OK accounts multiplexing is on\r\n";
     private static final String MULTIPLEXING_OFF_MSG = "+OK accounts multiplexing is off\r\n";
     private static final String silenceUser="SILENCE\\s.*\\r\\n";
-    private static final String changeUserDestinyServer="DESTINY\\s.*\\r\\n";
+    private static final String changeUserOriginServer="ORIGIN\\s.*\\r\\n";
     private static final String transformationOffRegex = "TOFF\\r\\n";
     private static final String transformationOnRegex = "TON\\r\\n";
     private static final String multiplexingOnRegex = "MON\\r\\n";
@@ -56,8 +56,8 @@ public class AdminProtocol implements TCPProtocol {
             .compile(multiplexingOnRegex);
     private static final Pattern patternMultiplexingOff = Pattern
             .compile(multiplexingOffRegex);
-    private static final Pattern patternChangeUserDestinyServer = Pattern
-            .compile(changeUserDestinyServer);
+    private static final Pattern patternChangeUserOriginServer = Pattern
+            .compile(changeUserOriginServer);
 
     private static final Logger LOGGER = Logger.getLogger(AdminProtocol.class);
 
@@ -189,9 +189,9 @@ public class AdminProtocol implements TCPProtocol {
                 reactorState.setOriginForUser(userOriginUrl.get(0),
                         userOriginUrl.get(1));
                 ans = CORRECT_OPERATION;
-            }else if (patternChangeUserDestinyServer.matcher(fromUser).matches()) {
+            }else if (patternChangeUserOriginServer.matcher(fromUser).matches()) {
                 String user=(fromUser.split(" ")[1]).trim();
-               reactorState.changeUserDestinyServer(user);
+                reactorState.changeUserOriginServer(user);
             }else {
 
                 ans = INCORRECT_COMMAND;

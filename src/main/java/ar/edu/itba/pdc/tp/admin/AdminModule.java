@@ -91,7 +91,7 @@ public class AdminModule {
     	return "ok";
     }
 
-	public void changeUserDestinyServer(String user) {
+	public void changeUserOriginServer(String user) {
 	 destinyServerByUser.put(user,"destinyServer");
 		
 	}

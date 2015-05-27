@@ -27,9 +27,8 @@ class XMPPWriter implements TCPEventHandler {
          * channel not closed).
          */
         // Retrieve data read earlier
-    	
+
     	final XMPPproxyState proxyState = (XMPPproxyState) key.attachment();
-        
     	final SocketChannel channel = (SocketChannel) key.channel();
     	ByteBuffer buf = (ByteBuffer) proxyState.getWriteBuffer(channel);
         buf.flip(); // Prepare buffer for writing
