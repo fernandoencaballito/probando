@@ -14,6 +14,7 @@ import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
+
 public abstract class GenericParser {
 	private static final String BODY = "body";
 	private static final String STREAM = "stream";
@@ -21,18 +22,14 @@ public abstract class GenericParser {
 	private static final String AUTH = "auth";
 	protected ByteBuffer buffer;
 	protected Element element;
-	
-	private boolean uncompletedRead=false;
-	
+
+	private boolean uncompletedRead = false;
+
 	// aalto
 	private AsyncXMLStreamReader<AsyncByteBufferFeeder> asyncXMLStreamReader;
 	private AsyncByteBufferFeeder feeder;
 
 	private int type;
-	
-	
-	private static final String  START_DOCUMENT="<?xml version='1.0' encoding='UTF-8'?>";
-	
 
 	public GenericParser(ByteBuffer buf) throws XMLStreamException {
 
@@ -46,17 +43,17 @@ public abstract class GenericParser {
 	}
 
 	public void feed() throws XMLStreamException {
-		if(feeder.needMoreInput())
-		feeder.feedInput(buffer);
-		
+		if (feeder.needMoreInput())
+			feeder.feedInput(buffer);
+
 	}
 
 	public void parse(XMPPproxyState state) {
-		uncompletedRead=true;
-		
+		uncompletedRead = true;
+
 		try {
 			while (!feeder.needMoreInput()) {
-				uncompletedRead=false;
+				uncompletedRead = false;
 				type = asyncXMLStreamReader.next();
 
 				System.out.println("OCURRIO TIPO: " + type);
@@ -102,12 +99,11 @@ public abstract class GenericParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if(!uncompletedRead && buffer.position()==0)
+		if (!uncompletedRead && buffer.position() == 0)
 			buffer.clear();
 
 	}
 
-	
 	private void processEndDocument() {
 		// TODO Auto-generated method stub
 
@@ -124,7 +120,7 @@ public abstract class GenericParser {
 		case MESSAGE: {
 			processMessageElementEnd();
 		}
-		case AUTH:{
+		case AUTH: {
 			processAuthElementEnd();
 		}
 
@@ -145,11 +141,11 @@ public abstract class GenericParser {
 			processMessageElementStart();
 			break;
 		}
-		case AUTH:{
+		case AUTH: {
 			processAuthElementStart();
 			break;
 		}
-		case BODY:{
+		case BODY: {
 			processMessage_bodyStart();
 			break;
 		}
@@ -173,7 +169,8 @@ public abstract class GenericParser {
 	protected abstract void processMessageElementStart();
 
 	protected abstract void processMessageElementEnd();
+
 	protected abstract void processMessage_bodyStart();
-	
+
 	protected abstract void processCharacters();
 }
