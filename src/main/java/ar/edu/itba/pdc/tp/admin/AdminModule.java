@@ -86,9 +86,8 @@ public class AdminModule {
         return transform;
     }
     
-    public String silence(String user){
+    public void silence(String user){
        SilencedUsers.add(user);
-    	return "ok";
     }
 
 	public void changeUserOriginServer(String user) {

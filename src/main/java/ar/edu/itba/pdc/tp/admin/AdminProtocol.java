@@ -25,6 +25,7 @@ public class AdminProtocol implements TCPProtocol {
     private static final String INCORRECT_LOGIN_MSG = "-ERR wrong password\r\n";
     private static final String INCORRECT_COMMAND = "-ERR invalid command\r\n";
     private static final String CORRECT_OPERATION = "+OK \r\n";
+    private static final String CORRECT_ORIGIN_CHANGED = "+OK changed origin server for user \r\n";
     private static final String TRANSFORMATION_ON_MSG = "+OK transformation of the subject is on \r\n";
     private static final String TRANSFORMATION_OFF_MSG = "+OK transformation of the subject is off \r\n";
     private static final String MULTIPLEXING_ON_MSG = "+OK accounts multiplexing is on\r\n";
@@ -192,6 +193,7 @@ public class AdminProtocol implements TCPProtocol {
             }else if (patternChangeUserOriginServer.matcher(fromUser).matches()) {
                 String user=(fromUser.split(" ")[1]).trim();
                 reactorState.changeUserOriginServer(user);
+                ans=CORRECT_ORIGIN_CHANGED;	
             }else {
 
                 ans = INCORRECT_COMMAND;
@@ -207,8 +209,8 @@ public class AdminProtocol implements TCPProtocol {
     }
 
     private String SilenceUsermsg(String user) {
-		String ans=reactorState.silence(user)+ "\r\n";
-		return ans;
+		reactorState.silence(user);
+		return CORRECT_SILENCE_MSG;
 		
 	
 	}
