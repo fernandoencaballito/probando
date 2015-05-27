@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+
 import ar.edu.itba.pdc.tp.tcp.TCPProtocol;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
@@ -24,6 +25,7 @@ public class AdminProtocol implements TCPProtocol {
     private static final String CORRECT_SILENCE_MSG = "+OK silence user\r\n";
     private static final String INCORRECT_LOGIN_MSG = "-ERR wrong password\r\n";
     private static final String INCORRECT_COMMAND = "-ERR invalid command\r\n";
+    private static final String INCORRECT_INT = "-ERR invalid command not an int\r\n";
     private static final String CORRECT_OPERATION = "+OK \r\n";
     private static final String CORRECT_ORIGIN_CHANGED = "+OK changed origin server for user \r\n";
     private static final String TRANSFORMATION_ON_MSG = "+OK transformation of the subject is on \r\n";
@@ -31,7 +33,7 @@ public class AdminProtocol implements TCPProtocol {
     private static final String MULTIPLEXING_ON_MSG = "+OK accounts multiplexing is on\r\n";
     private static final String MULTIPLEXING_OFF_MSG = "+OK accounts multiplexing is off\r\n";
     private static final String silenceUser="SILENCE\\s.*\\r\\n";
-    private static final String changeUserOriginServer="ORIGIN\\s.*\\r\\n";
+    private static final String changeUserOriginServer="SET\\s.*\\s.*\\s.*\\r\\n";
     private static final String transformationOffRegex = "TOFF\\r\\n";
     private static final String transformationOnRegex = "TON\\r\\n";
     private static final String multiplexingOnRegex = "MON\\r\\n";
@@ -186,14 +188,16 @@ public class AdminProtocol implements TCPProtocol {
             } else if (patternMultiplexingOff.matcher(fromUser).matches()) {
                 ans = MULTIPLEXING_OFF_MSG;
                 reactorState.multiplexingOff();
-            } else if ((userOriginUrl = (SetUserValidator.validate(fromUser))) != null) {
-                reactorState.setOriginForUser(userOriginUrl.get(0),
-                        userOriginUrl.get(1));
-                ans = CORRECT_OPERATION;
-            }else if (patternChangeUserOriginServer.matcher(fromUser).matches()) {
+            }//else if ((userOriginUrl = (SetUserValidator.validate(fromUser))) != null) {
+              //  reactorState.setOriginForUser(userOriginUrl.get(0),userOriginUrl.get(1),null);
+             //   ans = CORRECT_OPERATION;
+            //}
+        else if (patternChangeUserOriginServer.matcher(fromUser).matches()) {
                 String user=(fromUser.split(" ")[1]).trim();
-                reactorState.changeUserOriginServer(user);
-                ans=CORRECT_ORIGIN_CHANGED;	
+                String origin=(fromUser.split(" ")[2]).trim();
+                String port=(fromUser.split(" ")[3]).trim();
+                ans=changeOrigin(user,origin,port);
+                
             }else {
 
                 ans = INCORRECT_COMMAND;
@@ -208,7 +212,19 @@ public class AdminProtocol implements TCPProtocol {
         return connected;
     }
 
-    private String SilenceUsermsg(String user) {
+    private String changeOrigin(String user, String origin, String port) {
+    	System.out.println("puerto especificado "+port);
+		Integer originPort;
+		try{
+			originPort=Integer.valueOf(port);
+		}catch(Exception e){
+			return INCORRECT_INT;
+		}
+		reactorState.setOriginForUser(user,origin, originPort);
+		return CORRECT_ORIGIN_CHANGED;
+	}
+
+	private String SilenceUsermsg(String user) {
 		reactorState.silence(user);
 		return CORRECT_SILENCE_MSG;
 		
