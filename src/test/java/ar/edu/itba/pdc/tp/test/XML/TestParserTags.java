@@ -78,7 +78,7 @@ public class TestParserTags {
 		buffer.flip();
 //		MockParser parser2 = new MockParser(buffer);
 		parser.feed();
-		parser.parse(mockListener);
+		parser.parse(null);
 
 		assertFalse(parser.isStreamElementStart());
 
@@ -88,7 +88,7 @@ public class TestParserTags {
 		// SE TIENE QUE PASAR EL BUFFER A MODO Lectura
 		buffer.flip();
 		parser.feed();
-		parser.parse(mockListener);
+		parser.parse(null);
 		assertTrue(parser.isStreamElementStart());
 	}
 
@@ -112,7 +112,7 @@ public class TestParserTags {
 		buffer.flip();
 //		MockParser parser = new MockParser(buffer);
 
-		parser.parse(mockListener);
+		parser.parse(null);
 
 		assertFalse(parser.isStreamElementStart());
 		
@@ -123,7 +123,7 @@ public class TestParserTags {
 		// SE TIENE QUE PASAR EL BUFFER A MODO Lectura
 		buffer.flip();
 		parser.feed();
-		parser.parse(mockListener);
+		parser.parse(null);
 		assertTrue(parser.isStreamElementStart());
 	}
 	
@@ -138,7 +138,7 @@ public class TestParserTags {
 		buffer.flip();
 //		MockParser parser2 = new MockParser(buffer);
 		parser.feed();
-		parser.parse(mockListener);
+		parser.parse(null);
 
 		assertTrue(parser.isMessageElementStart());
 		assertFalse(parser.isMessage_bodySTART());
@@ -148,7 +148,7 @@ public class TestParserTags {
 		// SE TIENE QUE PASAR EL BUFFER A MODO Lectura
 		buffer.flip();
 		parser.feed();
-		parser.parse(mockListener);
+		parser.parse(null);
 		assertTrue(parser.isMessageElementStart());
 		assertTrue(parser.isMessage_bodySTART());
 	}
@@ -165,7 +165,7 @@ public class TestParserTags {
 		
 		
 		parser.feed();
-		parser.parse(mockListener);
+		parser.parse(null);
 	}
 
 	static void readFileIntoBuffer(String path, ByteBuffer buffer)

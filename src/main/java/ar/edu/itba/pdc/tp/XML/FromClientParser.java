@@ -76,8 +76,8 @@ public class FromClientParser extends GenericParser {
 	
 	@Override
 	protected void processAuthElementEnd() {
-		// TODO Auto-generated method stub
-		
+		state=ClientState.CONNECTING_TO_ORIGIN;
+		//conectar al origin server
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class FromClientParser extends GenericParser {
 			//se tiene el usuario y la contraseña de autenticación
 			User user=Base64.getUser(str);
 			proxyState.setUser(user);
-			
+			state=ClientState.AUTH_END_EXPECTED;
 			//conectar con el origin con el usuario especificado
 		}
 		

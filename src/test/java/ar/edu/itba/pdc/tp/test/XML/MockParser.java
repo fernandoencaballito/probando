@@ -7,6 +7,7 @@ import javax.xml.stream.events.StartElement;
 
 import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
+import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 
 public class MockParser extends GenericParser {
 
@@ -23,30 +24,30 @@ public class MockParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElement(XMPPlistener listener) {
+	protected void processStreamElement(XMPPproxyState state) {
 		this.streamElementStart = true;
 
 	}
 
 	@Override
-	protected void processStreamElementEnd(XMPPlistener listener) {
+	protected void processStreamElementEnd() {
 		streamElementEnd = true;
 
 	}
 
 	@Override
-	protected void processAuthElementStart(XMPPlistener listener) {
+	protected void processAuthElementStart() {
 		authElementStart = true;
 
 	}
 
 	@Override
-	protected void processAuthElementEnd(XMPPlistener listener) {
+	protected void processAuthElementEnd() {
 		authElementEnd = true;
 	}
 
 	@Override
-	protected void processMessageElementStart(XMPPlistener listener) {
+	protected void processMessageElementStart() {
 		messageElementStart = true;
 	}
 
@@ -59,7 +60,7 @@ public class MockParser extends GenericParser {
 	}
 
 	@Override
-	protected void processMessageElementEnd(XMPPlistener listener) {
+	protected void processMessageElementEnd() {
 		messageElementEnd = true;
 	}
 
@@ -90,6 +91,12 @@ public class MockParser extends GenericParser {
 	@Override
 	protected void processMessage_bodyStart() {
 		message_bodySTART=true;
+		
+	}
+
+	@Override
+	protected void processCharacters(String str, XMPPproxyState proxyState) {
+		// TODO Auto-generated method stub
 		
 	}
 

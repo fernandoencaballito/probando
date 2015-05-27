@@ -66,16 +66,10 @@ public class FromServerParser extends GenericParser {
 	}
 
 	@Override
-	protected void processCharacters() {
+	protected void processCharacters(String str, XMPPproxyState proxyState) {
 		// TODO Auto-generated method stub
 		
 	}
-
-	
-
-	
-	
-
 	
 
 }
