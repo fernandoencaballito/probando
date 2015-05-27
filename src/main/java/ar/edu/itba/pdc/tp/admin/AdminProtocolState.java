@@ -22,7 +22,6 @@ public class AdminProtocolState {
     private ByteBuffer clientBuffer;
 
     public AdminProtocolState(int bufSize) {
-
         clientBuffer = ByteBuffer.allocate(bufSize);
         bufferState = BufferStateEnum.READING;
         lastLine = ByteBuffer.allocate(bufSize);

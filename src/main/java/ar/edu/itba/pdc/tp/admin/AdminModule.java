@@ -1,8 +1,12 @@
 package ar.edu.itba.pdc.tp.admin;
 
+import java.awt.List;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /*
  * Clase que contiene objetos que comparten los protocolos de proxy y de administración.
@@ -12,6 +16,8 @@ public class AdminModule {
     private final short defaultPort;
 
     private Map<String, InetSocketAddress> originAddressesByUser = new HashMap<>();
+    private Map <String,String>destinyServerByUser= new HashMap<>();
+    private Set<String> SilencedUsers=new HashSet();
 
     private Metrics metrics;
     private boolean transform;
@@ -79,5 +85,15 @@ public class AdminModule {
     public Boolean getTransform() {
         return transform;
     }
+    
+    public String silence(String user){
+       SilencedUsers.add(user);
+    	return "ok";
+    }
+
+	public void changeUserDestinyServer(String user) {
+	 destinyServerByUser.put(user,"destinyServer");
+		
+	}
 
 }

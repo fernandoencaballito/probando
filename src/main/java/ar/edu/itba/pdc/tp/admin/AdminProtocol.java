@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-
 import ar.edu.itba.pdc.tp.tcp.TCPProtocol;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
@@ -22,6 +21,7 @@ public class AdminProtocol implements TCPProtocol {
 
     private final String ADMIN_PASSWORD = "password";
     private static final String CORRECT_LOGIN_MSG = "+OK ready\r\n";
+    private static final String CORRECT_SILENCE_MSG = "+OK silence user\r\n";
     private static final String INCORRECT_LOGIN_MSG = "-ERR wrong password\r\n";
     private static final String INCORRECT_COMMAND = "-ERR invalid command\r\n";
     private static final String CORRECT_OPERATION = "+OK \r\n";
@@ -29,7 +29,8 @@ public class AdminProtocol implements TCPProtocol {
     private static final String TRANSFORMATION_OFF_MSG = "+OK transformation of the subject is off \r\n";
     private static final String MULTIPLEXING_ON_MSG = "+OK accounts multiplexing is on\r\n";
     private static final String MULTIPLEXING_OFF_MSG = "+OK accounts multiplexing is off\r\n";
-
+    private static final String silenceUser="SILENCE\\s.*\\r\\n";
+    private static final String changeUserDestinyServer="DESTINY\\s.*\\r\\n";
     private static final String transformationOffRegex = "TOFF\\r\\n";
     private static final String transformationOnRegex = "TON\\r\\n";
     private static final String multiplexingOnRegex = "MON\\r\\n";
@@ -42,6 +43,8 @@ public class AdminProtocol implements TCPProtocol {
     private static final Pattern patternPass = Pattern.compile(passRegex);
     private static final Pattern patternMetricsAccesses = Pattern
             .compile(metricsAccessesRegex);
+    private static final Pattern patternSilenceUser = Pattern
+            .compile(silenceUser);
     private static final Pattern patternMetricsTransfered = Pattern
             .compile(metricsTransferedRegex);
     private static final Pattern patternQuit = Pattern.compile(quitRegex);
@@ -53,6 +56,8 @@ public class AdminProtocol implements TCPProtocol {
             .compile(multiplexingOnRegex);
     private static final Pattern patternMultiplexingOff = Pattern
             .compile(multiplexingOffRegex);
+    private static final Pattern patternChangeUserDestinyServer = Pattern
+            .compile(changeUserDestinyServer);
 
     private static final Logger LOGGER = Logger.getLogger(AdminProtocol.class);
 
@@ -163,6 +168,9 @@ public class AdminProtocol implements TCPProtocol {
                 LOGGER.info("Disconnected");
             } else if (patternMetricsAccesses.matcher(fromUser).matches()) {
                 ans = buildMetrics1Msg();
+            }  else if (patternSilenceUser.matcher(fromUser).matches()) {
+            	String user=(fromUser.split(" ")[1]).trim();
+                ans = SilenceUsermsg(user);
             } else if (patternMetricsTransfered.matcher(fromUser).matches()) {
                 ans = buildMetrics2Msg();
             } else if (patternTransformationOff.matcher(fromUser).matches()) {
@@ -181,8 +189,10 @@ public class AdminProtocol implements TCPProtocol {
                 reactorState.setOriginForUser(userOriginUrl.get(0),
                         userOriginUrl.get(1));
                 ans = CORRECT_OPERATION;
-
-            } else {
+            }else if (patternChangeUserDestinyServer.matcher(fromUser).matches()) {
+                String user=(fromUser.split(" ")[1]).trim();
+               reactorState.changeUserDestinyServer(user);
+            }else {
 
                 ans = INCORRECT_COMMAND;
             }
@@ -196,7 +206,14 @@ public class AdminProtocol implements TCPProtocol {
         return connected;
     }
 
-    // metricas, cantidad de accesos
+    private String SilenceUsermsg(String user) {
+		String ans=reactorState.silence(user)+ "\r\n";
+		return ans;
+		
+	
+	}
+
+	// metricas, cantidad de accesos
     private String buildMetrics1Msg() {
         String ans = reactorState.getAccesses() + "\r\n";
         return ans;
@@ -225,5 +242,6 @@ public class AdminProtocol implements TCPProtocol {
 
     @Override
     public void handleConnect(SelectionKey key) throws IOException {
+    	System.out.println("handle connect");
     }
 }
