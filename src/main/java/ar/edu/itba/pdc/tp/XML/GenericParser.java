@@ -13,6 +13,7 @@ import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
+
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 
 public abstract class GenericParser {
@@ -21,7 +22,6 @@ public abstract class GenericParser {
 	private static final String MESSAGE = "message";
 	private static final String AUTH = "auth";
 	protected ByteBuffer buffer;
-	protected Element element;
 
 	private boolean uncompletedRead = false;
 
@@ -77,7 +77,7 @@ public abstract class GenericParser {
 						break;// ignorar
 
 					System.out.println("characters :" + str);
-
+					processCharacters(str,state);
 					break;
 				}
 				case XMLEvent.END_ELEMENT:
@@ -172,5 +172,5 @@ public abstract class GenericParser {
 
 	protected abstract void processMessage_bodyStart();
 
-	protected abstract void processCharacters();
+	protected abstract void processCharacters(String str,XMPPproxyState proxyState);
 }

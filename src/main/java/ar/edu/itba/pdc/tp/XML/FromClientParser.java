@@ -99,17 +99,17 @@ public class FromClientParser extends GenericParser {
 	}
 
 	@Override
-	protected void processCharacters() {
+	protected void processCharacters(String str, XMPPproxyState proxyState) {
 		if(state==ClientState.AUTH_VALUE_EXPECTED){
 			//se tiene el usuario y la contraseña de autenticación
+			User user=Base64.getUser(str);
+			proxyState.setUser(user);
 			
+			//conectar con el origin con el usuario especificado
 		}
 		
 	}
 
-	
-
-	
 	
 
 }

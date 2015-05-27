@@ -16,6 +16,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import ar.edu.itba.pdc.tp.XML.FromClientParser;
 import ar.edu.itba.pdc.tp.XML.GenericParser;
+import ar.edu.itba.pdc.tp.XML.User;
 import ar.edu.itba.pdc.tp.email.EmailConverter;
 
 public class XMPPproxyState {
@@ -31,7 +32,7 @@ public class XMPPproxyState {
 	private GenericParser clientParser;
 	
 	private GenericParser serverParser;
-
+	private User user;
 
 	XMPPproxyState(final SocketChannel clientChannel) throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
@@ -152,5 +153,16 @@ public class XMPPproxyState {
 
 	public GenericParser getServerParser() {
 		return serverParser;
+	}
+
+
+	public void setUser(User user) {
+		this.user=user;
+		
+	}
+	
+	public String getUserName(){
+		return this.user.getUsername();
+		
 	}
 }
