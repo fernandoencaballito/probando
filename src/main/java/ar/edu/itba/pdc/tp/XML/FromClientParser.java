@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.util.Properties;
 
 import javax.xml.stream.XMLEventFactory;
@@ -78,6 +79,8 @@ public class FromClientParser extends GenericParser {
 	protected void processAuthElementEnd() {
 		state=ClientState.CONNECTING_TO_ORIGIN;
 		//conectar al origin server
+		XMPPlistener.connectToOrigin(null, null);
+		
 	}
 
 	@Override
