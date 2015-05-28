@@ -17,7 +17,7 @@ public class AdminModule {
 
     private Map<String, InetSocketAddress> originAddressesByUser = new HashMap<>();
     private Map <String,String>destinyServerByUser= new HashMap<>();
-    private Set<String> SilencedUsers=new HashSet();
+    private Set<String> silencedUsers=new HashSet();
 
     private Metrics metrics;
     private boolean transform;
@@ -47,9 +47,12 @@ public class AdminModule {
         return metrics.getBytesTransfered();
     }
 
-    public void setOriginForUser(String user, String originUrl) {
-        originAddressesByUser.put(user, new InetSocketAddress(originUrl,
-                defaultPort));
+    public void setOriginForUser(String user, String originUrl, Integer originPort) {
+    	if(originPort==null){
+    		originPort=(int) defaultPort;
+    	}
+        originAddressesByUser.put(user, new InetSocketAddress(originUrl,originPort
+                /*defaultPort*/));
     }
 
     public InetSocketAddress getOriginAddressForUser(String user) {
@@ -86,12 +89,11 @@ public class AdminModule {
         return transform;
     }
     
-    public String silence(String user){
-       SilencedUsers.add(user);
-    	return "ok";
+    public void silence(String user){
+       silencedUsers.add(user);
     }
 
-	public void changeUserOriginServer(String user) {
+	public void changeUserOriginServer(String user, String origin, int port) {
 	 destinyServerByUser.put(user,"destinyServer");
 		
 	}
