@@ -1,10 +1,11 @@
 #!/bin/bash
 defaultJarPath="./target/uber-tp-0.0.1-SNAPSHOT.jar"
 finalJarPath="./binary/tpeBinary.jar"
-configurationFile="./proxyServer.properties"
+configurationFolder="properties/"
 finalPath="./binary/"
 mvn clean package
 #echo $defaultJarPath $finalJarPath
+rm -rf binary
 mkdir binary
 cp $defaultJarPath $finalJarPath
-cp $configurationFile $finalPath
+cp -r $configurationFolder $finalPath

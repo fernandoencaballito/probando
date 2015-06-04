@@ -1,6 +1,8 @@
 package ar.edu.itba.pdc.tp.test.XML;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.Selector;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
@@ -8,6 +10,9 @@ import javax.xml.stream.events.StartElement;
 import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
+import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
+import ar.edu.itba.pdc.tp.admin.AdminModule;
+import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
 public class MockParser extends GenericParser {
 
@@ -24,30 +29,36 @@ public class MockParser extends GenericParser {
 	}
 
 	@Override
-	protected void processStreamElement(XMPPproxyState state) {
+	protected void processStreamElement(XMPPproxyState state,
+			Selector selector) throws ClosedChannelException {
 		this.streamElementStart = true;
 
 	}
 
 	@Override
-	protected void processStreamElementEnd() {
+	protected void processStreamElementEnd(XMPPproxyState state,
+			Selector selector) {
 		streamElementEnd = true;
 
 	}
 
 	@Override
-	protected void processAuthElementStart() {
+	protected void processAuthElementStart(XMPPproxyState state,
+			Selector selector) {
 		authElementStart = true;
 
 	}
 
 	@Override
-	protected void processAuthElementEnd() {
+	protected void processAuthElementEnd(XMPPproxyState proxyState,
+			Selector selector, XMPproxy protocol, AdminModule adminModule,
+			TCPReactor reactor) {
 		authElementEnd = true;
 	}
 
 	@Override
-	protected void processMessageElementStart() {
+	protected void processMessageElementStart(XMPPproxyState state,
+			Selector selector) {
 		messageElementStart = true;
 	}
 
@@ -60,7 +71,8 @@ public class MockParser extends GenericParser {
 	}
 
 	@Override
-	protected void processMessageElementEnd() {
+	protected void processMessageElementEnd (XMPPproxyState state,
+			Selector selector){
 		messageElementEnd = true;
 	}
 
@@ -89,13 +101,15 @@ public class MockParser extends GenericParser {
 	}
 
 	@Override
-	protected void processMessage_bodyStart() {
+	protected void processMessage_bodyStart (XMPPproxyState state,
+			Selector selector){
 		message_bodySTART=true;
 		
 	}
 
 	@Override
-	protected void processCharacters(String str, XMPPproxyState proxyState) {
+	protected void processCharacters(String str,
+			XMPPproxyState proxyState, Selector selector) {
 		// TODO Auto-generated method stub
 		
 	}

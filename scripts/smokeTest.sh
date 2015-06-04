@@ -13,5 +13,5 @@ jarPath="./target/uber-tp-0.0.1-SNAPSHOT.jar"
 set -ev
 chmod 700 $jarPath
 trap  "cleanup" EXIT
-timeout 20s java -jar $jarPath ./proxyServer.properties
+timeout 10s java -jar $jarPath 
 
