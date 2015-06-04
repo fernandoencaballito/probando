@@ -97,24 +97,22 @@ class XMPPreader implements TCPEventHandler {
 
 
 
-	private void negotiateFileTransfer(XMPPproxyState proxyState) {
-		
-	}
+	
 
-	private void connectToOrigin(SelectionKey key, XMPPproxyState proxyState,
-			String user) {
-		try {
-			InetSocketAddress originAddress = adminModule
-					.getOriginAddressForUser(user);
-			SocketChannel originChannel = nonBlockingSocket(originAddress);
-			proxyState.setOriginChannel(originChannel);
-			originChannel.register(key.selector(), SelectionKey.OP_CONNECT,
-					proxyState);
-			reactor.subscribeChannel(originChannel, parent);
-		} catch (IOException e) {
-			// sendResponseToClient(proxyState, ERR);
-		}
-
-	}
+//	private void connectToOrigin(SelectionKey key, XMPPproxyState proxyState,
+//			String user) {
+//		try {
+//			InetSocketAddress originAddress = adminModule
+//					.getOriginAddressForUser(user);
+//			SocketChannel originChannel = nonBlockingSocket(originAddress);
+//			proxyState.setOriginChannel(originChannel);
+//			originChannel.register(key.selector(), SelectionKey.OP_CONNECT,
+//					proxyState);
+//			reactor.subscribeChannel(originChannel, parent);
+//		} catch (IOException e) {
+//			// sendResponseToClient(proxyState, ERR);
+//		}
+//
+//	}
 
 }

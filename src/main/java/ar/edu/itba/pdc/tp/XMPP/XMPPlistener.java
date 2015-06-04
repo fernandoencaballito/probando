@@ -10,6 +10,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import javax.xml.stream.XMLStreamException;
+
 import ar.edu.itba.pdc.tp.XML.User;
 import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
@@ -18,7 +20,7 @@ public class XMPPlistener {
 
 	public static void connectToOrigin(XMPPproxyState state, Selector selector,
 			 AdminModule adminModule, XMPproxy protocol,
-			TCPReactor reactor) throws IOException {
+			TCPReactor reactor) throws IOException, XMLStreamException {
 		InetSocketAddress originAddress = adminModule
 				.getOriginAddressForUser(state.getUserName());
 		SocketChannel originChannel = nonBlockingSocket(originAddress);
@@ -32,12 +34,15 @@ public class XMPPlistener {
 
 	}
 
-	public static void writeToOrigin(byte[] array, XMPPproxyState state) {
-		
+	public static void writeToOrigin(byte[] array, XMPPproxyState state,Selector selector) throws ClosedChannelException {
+		ByteBuffer buffer=state.getOriginBuffer();
+		buffer.clear();
+		buffer.put(array);
+		state.getOriginChannel().register(selector, SelectionKey.OP_WRITE,state);
 	}
 	
 	public static void writeToOrigin(String str, XMPPproxyState state,Selector selector) throws ClosedChannelException {
-		writeToClient(str.getBytes(), state, selector);
+		writeToOrigin(str.getBytes(), state, selector);
 	}
 
 	public static void writeToClient(byte[] array, XMPPproxyState state,
@@ -56,19 +61,5 @@ public class XMPPlistener {
 
 	}
 
-	private void connectToOrigin(SelectionKey key, XMPPproxyState proxyState,
-			String user, AdminModule adminModule) {
-		try {
-			InetSocketAddress originAddress = adminModule
-					.getOriginAddressForUser(user);
-			SocketChannel originChannel = nonBlockingSocket(originAddress);
-			proxyState.setOriginChannel(originChannel);
-			originChannel.register(key.selector(), SelectionKey.OP_CONNECT,
-					proxyState);
-			// reactor.subscribeChannel(originChannel, parent);
-		} catch (IOException e) {
-			// sendResponseToClient(proxyState, ERR);
-		}
-
-	}
+	
 }

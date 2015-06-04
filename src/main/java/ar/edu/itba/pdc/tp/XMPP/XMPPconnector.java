@@ -29,7 +29,8 @@ class XMPPconnector implements TCPEventHandler {
                 LOGGER.info("Channel "
                         + state.getClientChannel().getRemoteAddress()
                         + " connected to origin server");
-                state.updateSubscription(key.selector());
+              //  state.updateSubscription(key.selector());
+                state.getServerParser().initiateStream(state,key.selector());
             } else {
                 state.closeChannels();
             }

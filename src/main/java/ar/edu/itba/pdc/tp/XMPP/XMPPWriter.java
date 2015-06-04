@@ -39,7 +39,8 @@ class XMPPWriter implements TCPEventHandler {
 			writeChannel.write(buf);
 			
 	        buf.compact(); // Make room for more data to be read in
-	        proxyState.updateSubscription(key.selector());
+//	        proxyState.updateSubscription(key.selector());
+	        writeChannel.register(key.selector(), SelectionKey.OP_READ, proxyState);
 			
 		} catch (IOException e) {
 			LOGGER.error("Can't write on selected channel");

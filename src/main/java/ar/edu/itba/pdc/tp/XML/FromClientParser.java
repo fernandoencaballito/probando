@@ -83,7 +83,7 @@ public class FromClientParser extends GenericParser {
 			XMPPlistener.connectToOrigin(proxyState, selector, adminModule,
 					protocol, reactor);
 			announceCorrectConnectToOrigin();
-		} catch (IOException e) {
+		} catch (IOException | XMLStreamException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -126,6 +126,20 @@ public class FromClientParser extends GenericParser {
 	
 	 protected void announceCorrectConnectToOrigin(){
 		this.state=ClientState.CONNECTED_TO_ORIGIN;
+	}
+
+	@Override
+	protected void processOtherStartElement(XMPPproxyState state,
+			Selector selector) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processOtherEndElement(XMPPproxyState state,
+			Selector selector,String elementName) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

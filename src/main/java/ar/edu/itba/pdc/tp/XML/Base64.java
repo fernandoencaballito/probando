@@ -27,7 +27,7 @@ public class Base64 {
 
 		String password = new String(bytes, separatorIndex, passwordLength,
 				Charset.forName("UTF-8"));
-		User user = new User(username.trim(), password.trim());
+		User user = new User(username.trim(), password.trim(), base64Coded);
 		return user;
 	}
 

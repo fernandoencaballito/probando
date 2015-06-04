@@ -15,6 +15,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import ar.edu.itba.pdc.tp.XML.FromClientParser;
+import ar.edu.itba.pdc.tp.XML.FromServerParser;
 import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.XML.User;
 import ar.edu.itba.pdc.tp.email.EmailConverter;
@@ -22,7 +23,7 @@ import ar.edu.itba.pdc.tp.email.EmailConverter;
 public class XMPPproxyState {
 	private static final int BUFF_SIZE = 4 * 1024;
 
-	private  ByteBuffer originBuffer ;
+	private  ByteBuffer originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
 	
 	private  ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
 
@@ -31,7 +32,7 @@ public class XMPPproxyState {
 
 	private FromClientParser clientParser;
 	
-	private GenericParser serverParser;
+	private FromServerParser serverParser;
 	private User user;
 
 	XMPPproxyState(final SocketChannel clientChannel) throws FileNotFoundException, XMLStreamException {
@@ -46,11 +47,12 @@ public class XMPPproxyState {
 		}
 	}
 
-	void setOriginChannel(SocketChannel originChannel) {
+	void setOriginChannel(SocketChannel originChannel) throws FileNotFoundException, XMLStreamException {
 		if (this.originChannel != null) {
 			throw new IllegalStateException();
 		}
 		this.originChannel = originChannel;
+		this.serverParser= new FromServerParser(originBuffer);
 	}
 
 
@@ -70,7 +72,10 @@ public class XMPPproxyState {
 		return originBuffer;
 	}
 
-
+	public String getUserPlainAuth(){
+		return user.getPlainAuth();
+	}
+	
 
 
 
@@ -151,7 +156,7 @@ public class XMPPproxyState {
 	
 
 
-	public GenericParser getServerParser() {
+	public FromServerParser getServerParser() {
 		return serverParser;
 	}
 

@@ -116,7 +116,7 @@ public abstract class GenericParser {
 	}
 
 	private void processEndElement(XMPPproxyState state, Selector selector,
-			XMPproxy protocol, AdminModule adminModule, TCPReactor reactor) {
+			XMPproxy protocol, AdminModule adminModule, TCPReactor reactor) throws ClosedChannelException {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
@@ -132,10 +132,14 @@ public abstract class GenericParser {
 					reactor);
 		}
 
-		default:
+		default:{
+			processOtherEndElement(state, selector,elementName);
 			break;
 		}
+		}
 	}
+
+	protected abstract void processOtherEndElement(XMPPproxyState state, Selector selector, String elementName) throws ClosedChannelException ;
 
 	private void processStartElement(XMPPproxyState state, Selector selector)
 			throws ClosedChannelException {
@@ -159,11 +163,16 @@ public abstract class GenericParser {
 			break;
 		}
 
-		default:
+		default:{
+			processOtherStartElement(state,selector);
 			break;
+		}
 		}
 
 	}
+
+	protected abstract void processOtherStartElement(XMPPproxyState state,
+			Selector selector);
 
 	// solo parar elemento STREAM:STREAM
 	protected abstract void processStreamElement(XMPPproxyState state,
