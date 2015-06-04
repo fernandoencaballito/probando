@@ -1,118 +1,131 @@
 package ar.edu.itba.pdc.tp.XML;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.Selector;
 import java.util.Properties;
 
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.StartDocument;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
 
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
+import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
+import ar.edu.itba.pdc.tp.admin.AdminModule;
+import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 
 public class FromClientParser extends GenericParser {
-	private enum ClientState { CONNECTION_STABLISHED, AUTH_EXPECTED, AUTH_VALUE_EXPECTED,AUTH_END_EXPECTED,
-		CONNECTING_TO_ORIGIN,CONNECTED_TO_ORIGIN};
-	
-	
+	private enum ClientState {
+		CONNECTION_STABLISHED, AUTH_EXPECTED, AUTH_VALUE_EXPECTED, AUTH_END_EXPECTED, CONNECTING_TO_ORIGIN, CONNECTED_TO_ORIGIN
+	};
+
 	private ClientState state;
-	private static String PROPERTIES_FILENAME = "./clientParser.properties";
+	private static String PROPERTIES_FILENAME = "./properties/clientParser.properties";
 	private static String INITIAL_TAG;
-	
-	
-	public FromClientParser(ByteBuffer buf) throws XMLStreamException, FileNotFoundException {
+
+	public FromClientParser(ByteBuffer buf) throws XMLStreamException,
+			FileNotFoundException {
 		super(buf);
-		state=ClientState.CONNECTION_STABLISHED;
-		if(INITIAL_TAG==null)
+		state = ClientState.CONNECTION_STABLISHED;
+		if (INITIAL_TAG == null)
 			loadPropertiesFile(PROPERTIES_FILENAME);
-		
+
 	}
 
-	private void loadPropertiesFile(String fileName) throws FileNotFoundException {
+	private void loadPropertiesFile(String fileName)
+			throws FileNotFoundException {
 		Properties properties = PropertiesFileLoader
 				.loadPropertiesFromFile(fileName);
-		INITIAL_TAG=properties.getProperty("INITIAL_TAG");
-		
-		
+		INITIAL_TAG = properties.getProperty("INITIAL_TAG");
+
 	}
 
 	@Override
-	protected void processStreamElement(XMPPproxyState proxyState) {
-		if(state==ClientState.CONNECTION_STABLISHED){
-			
-			XMPPlistener.writeToClient(INITIAL_TAG, proxyState);
-			state=ClientState.AUTH_EXPECTED;
-		}else if(state==ClientState.CONNECTED_TO_ORIGIN){
-			//ignorar
+	protected void processStreamElement(XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException {
+		if (state == ClientState.CONNECTION_STABLISHED) {
+
+			XMPPlistener.writeToClient(INITIAL_TAG, proxyState, selector);
+			state = ClientState.AUTH_EXPECTED;
+		} else if (state == ClientState.CONNECTED_TO_ORIGIN) {
+			// ignorar
 		}
-		
+
 	}
 
 	@Override
-	protected void processStreamElementEnd() {
+	protected void processStreamElementEnd(XMPPproxyState proxyState,
+			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	protected void processAuthElementStart() {
-		if(state==ClientState.AUTH_EXPECTED){
-			state=ClientState.AUTH_VALUE_EXPECTED;
-		}else{
-			//error
+	protected void processAuthElementStart(XMPPproxyState proxyState,
+			Selector selector) {
+		if (state == ClientState.AUTH_EXPECTED) {
+			state = ClientState.AUTH_VALUE_EXPECTED;
+		} else {
+			// error
 		}
-		
-	}
-	
-	
-	@Override
-	protected void processAuthElementEnd() {
-		state=ClientState.CONNECTING_TO_ORIGIN;
-		//conectar al origin server
-		XMPPlistener.connectToOrigin(null, null);
-		
+
 	}
 
 	@Override
-	protected void processMessageElementStart() {
+	protected void processAuthElementEnd(XMPPproxyState proxyState,
+			Selector selector, XMPproxy protocol, AdminModule adminModule,
+			TCPReactor reactor) {
+		state = ClientState.CONNECTING_TO_ORIGIN;
+		// conectar al origin server
+		try {
+			XMPPlistener.connectToOrigin(proxyState, selector, adminModule,
+					protocol, reactor);
+			announceCorrectConnectToOrigin();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	protected void processMessageElementStart(XMPPproxyState proxyState,
+			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	protected void processMessageElementEnd() {
+	protected void processMessageElementEnd(XMPPproxyState proxyState,
+			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	protected void processMessage_bodyStart() {
+	protected void processMessage_bodyStart(XMPPproxyState proxyState,
+			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	protected void processCharacters(String str, XMPPproxyState proxyState) {
-		if(state==ClientState.AUTH_VALUE_EXPECTED){
-			//se tiene el usuario y la contraseña de autenticación
-			User user=Base64.getUser(str);
+	protected void processCharacters(String str, XMPPproxyState proxyState,
+			Selector selector) {
+		if (state == ClientState.AUTH_VALUE_EXPECTED) {
+			// se tiene el usuario y la contraseña de autenticación
+			User user = Base64.getUser(str);
 			proxyState.setUser(user);
-			state=ClientState.AUTH_END_EXPECTED;
-			//conectar con el origin con el usuario especificado
+			state = ClientState.AUTH_END_EXPECTED;
+			// conectar con el origin con el usuario especificado
 		}
-		
-	}
 
+	}
 	
+	 protected void announceCorrectConnectToOrigin(){
+		this.state=ClientState.CONNECTED_TO_ORIGIN;
+	}
 
 }

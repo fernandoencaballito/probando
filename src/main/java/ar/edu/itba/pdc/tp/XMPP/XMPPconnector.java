@@ -36,10 +36,10 @@ class XMPPconnector implements TCPEventHandler {
         } catch (IOException e) {
             LOGGER.error("Failed to connect to origin server("
                     + originChannel.getRemoteAddress() + "): " + e.getMessage());
-            // state.closeChannels();
-            ByteBuffer clientBuffer = state.getClientBuffer();
-            writeMsg(clientBuffer, UNABLE_TO_CONNECT_MSG);
-            state.updateSubscription(key.selector());
+            
+//            ByteBuffer clientBuffer = state.getClientBuffer();
+//            writeMsg(clientBuffer, UNABLE_TO_CONNECT_MSG);
+//            state.updateSubscription(key.selector());
         }
         
 

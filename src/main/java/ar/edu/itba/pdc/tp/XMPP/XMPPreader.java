@@ -80,13 +80,13 @@ class XMPPreader implements TCPEventHandler {
 			// processar lo leido con el parser
 			try {
 				parser.feed();
-				parser.parse(proxyState);
+				parser.parse(proxyState,key.selector(),parent,adminModule,reactor);
 			} catch (XMLStreamException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			//
-			proxyState.updateSubscription(key.selector());
+			//proxyState.updateSubscription(key.selector());
 			// if(proxyState.getOriginChannel()==null){
 			// connectToOrigin(key, proxyState,"hola");
 			// }

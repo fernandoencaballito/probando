@@ -29,7 +29,7 @@ public class XMPPproxyState {
 	private final SocketChannel clientChannel;
 	private SocketChannel originChannel = null;
 
-	private GenericParser clientParser;
+	private FromClientParser clientParser;
 	
 	private GenericParser serverParser;
 	private User user;
@@ -165,4 +165,10 @@ public class XMPPproxyState {
 		return this.user.getUsername();
 		
 	}
+
+
+	
+
+
+	
 }

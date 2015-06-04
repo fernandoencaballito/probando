@@ -1,6 +1,8 @@
 package ar.edu.itba.pdc.tp.XML;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.Selector;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -8,6 +10,7 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
+import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
 
 import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
@@ -15,6 +18,8 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
+import ar.edu.itba.pdc.tp.admin.AdminModule;
+import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
 public abstract class GenericParser {
 	private static final String BODY = "body";
@@ -48,7 +53,8 @@ public abstract class GenericParser {
 
 	}
 
-	public void parse(XMPPproxyState state) {
+	public void parse(XMPPproxyState state, Selector selector,
+			XMPproxy protocol, AdminModule adminModule,TCPReactor reactor) {
 		uncompletedRead = true;
 
 		try {
@@ -68,7 +74,7 @@ public abstract class GenericParser {
 				case XMLEvent.START_ELEMENT: {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
-					processStartElement(state);
+					processStartElement(state, selector);
 					break;
 				}
 				case XMLEvent.CHARACTERS: {
@@ -77,17 +83,17 @@ public abstract class GenericParser {
 						break;// ignorar
 
 					System.out.println("characters :" + str);
-					processCharacters(str,state);
+					processCharacters(str, state, selector);
 					break;
 				}
 				case XMLEvent.END_ELEMENT:
 					System.out.println("end element: "
 							+ asyncXMLStreamReader.getName());
-					processEndElement();
+					processEndElement(state, selector, protocol, adminModule,reactor);
 					break;
 				case XMLEvent.END_DOCUMENT:
 					System.out.println("end document");
-					processEndDocument();
+					processEndDocument(state, selector);
 					break;
 				default:
 					break;
@@ -95,7 +101,7 @@ public abstract class GenericParser {
 				}
 			}
 
-		} catch (XMLStreamException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -104,24 +110,26 @@ public abstract class GenericParser {
 
 	}
 
-	private void processEndDocument() {
+	private void processEndDocument(XMPPproxyState state, Selector selector) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void processEndElement() {
+	private void processEndElement(XMPPproxyState state, Selector selector,
+			XMPproxy protocol, AdminModule adminModule, TCPReactor reactor) {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
 		case STREAM: {
-			processStreamElementEnd();
+			processStreamElementEnd(state, selector);
 			break;
 		}
 		case MESSAGE: {
-			processMessageElementEnd();
+			processMessageElementEnd(state, selector);
 		}
 		case AUTH: {
-			processAuthElementEnd();
+			processAuthElementEnd(state, selector, protocol, adminModule,
+					reactor);
 		}
 
 		default:
@@ -129,24 +137,25 @@ public abstract class GenericParser {
 		}
 	}
 
-	private void processStartElement(XMPPproxyState state) {
+	private void processStartElement(XMPPproxyState state, Selector selector)
+			throws ClosedChannelException {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
 		case STREAM: {
-			processStreamElement(state);
+			processStreamElement(state, selector);
 			break;
 		}
 		case MESSAGE: {
-			processMessageElementStart();
+			processMessageElementStart(state, selector);
 			break;
 		}
 		case AUTH: {
-			processAuthElementStart();
+			processAuthElementStart(state, selector);
 			break;
 		}
 		case BODY: {
-			processMessage_bodyStart();
+			processMessage_bodyStart(state, selector);
 			break;
 		}
 
@@ -157,20 +166,30 @@ public abstract class GenericParser {
 	}
 
 	// solo parar elemento STREAM:STREAM
-	protected abstract void processStreamElement(XMPPproxyState state);
+	protected abstract void processStreamElement(XMPPproxyState state,
+			Selector selector) throws ClosedChannelException;
 
 	// solo parar elemento /STREAM:STREAM
-	protected abstract void processStreamElementEnd();
+	protected abstract void processStreamElementEnd(XMPPproxyState state,
+			Selector selector);
 
-	protected abstract void processAuthElementStart();
+	protected abstract void processAuthElementStart(XMPPproxyState state,
+			Selector selector);
 
-	protected abstract void processAuthElementEnd();
+	protected abstract void processAuthElementEnd(XMPPproxyState proxyState,
+			Selector selector, XMPproxy protocol, AdminModule adminModule,
+			TCPReactor reactor);
 
-	protected abstract void processMessageElementStart();
+	protected abstract void processMessageElementStart(XMPPproxyState state,
+			Selector selector);
 
-	protected abstract void processMessageElementEnd();
+	protected abstract void processMessageElementEnd(XMPPproxyState state,
+			Selector selector);
 
-	protected abstract void processMessage_bodyStart();
+	protected abstract void processMessage_bodyStart(XMPPproxyState state,
+			Selector selector);
 
-	protected abstract void processCharacters(String str,XMPPproxyState proxyState);
+	protected abstract void processCharacters(String str,
+			XMPPproxyState proxyState, Selector selector);
+
 }
