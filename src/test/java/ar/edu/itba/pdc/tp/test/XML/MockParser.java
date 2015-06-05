@@ -7,6 +7,8 @@ import java.nio.channels.Selector;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+
 import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
@@ -30,21 +32,21 @@ public class MockParser extends GenericParser {
 
 	@Override
 	protected void processStreamElement(XMPPproxyState state,
-			Selector selector) throws ClosedChannelException {
+			Selector selector, AsyncXMLStreamReader reader) throws ClosedChannelException {
 		this.streamElementStart = true;
 
 	}
 
 	@Override
 	protected void processStreamElementEnd(XMPPproxyState state,
-			Selector selector) {
+			Selector selector, AsyncXMLStreamReader reader) {
 		streamElementEnd = true;
 
 	}
 
 	@Override
 	protected void processAuthElementStart(XMPPproxyState state,
-			Selector selector) {
+			Selector selector, AsyncXMLStreamReader reader) {
 		authElementStart = true;
 
 	}
@@ -58,7 +60,7 @@ public class MockParser extends GenericParser {
 
 	@Override
 	protected void processMessageElementStart(XMPPproxyState state,
-			Selector selector) {
+			Selector selector, AsyncXMLStreamReader reader) {
 		messageElementStart = true;
 	}
 
@@ -72,7 +74,7 @@ public class MockParser extends GenericParser {
 
 	@Override
 	protected void processMessageElementEnd (XMPPproxyState state,
-			Selector selector){
+			Selector selector, AsyncXMLStreamReader reader){
 		messageElementEnd = true;
 	}
 
@@ -102,14 +104,14 @@ public class MockParser extends GenericParser {
 
 	@Override
 	protected void processMessage_bodyStart (XMPPproxyState state,
-			Selector selector){
+			Selector selector, AsyncXMLStreamReader reader){
 		message_bodySTART=true;
 		
 	}
 
 	@Override
 	protected void processCharacters(String str,
-			XMPPproxyState proxyState, Selector selector) {
+			XMPPproxyState proxyState, Selector selector, AsyncXMLStreamReader reader) {
 		// TODO Auto-generated method stub
 		
 	}

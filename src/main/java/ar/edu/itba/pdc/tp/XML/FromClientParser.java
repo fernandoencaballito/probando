@@ -9,6 +9,8 @@ import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
@@ -130,14 +132,14 @@ public class FromClientParser extends GenericParser {
 
 	@Override
 	protected void processOtherStartElement(XMPPproxyState state,
-			Selector selector,String elementName) {
+			Selector selector) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	protected void processOtherEndElement(XMPPproxyState state,
-			Selector selector,String elementName) {
+			Selector selector) {
 		// TODO Auto-generated method stub
 		
 	}

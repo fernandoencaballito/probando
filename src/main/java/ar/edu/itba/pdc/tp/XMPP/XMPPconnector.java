@@ -14,7 +14,6 @@ import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
 class XMPPconnector implements TCPEventHandler {
     private static final Logger LOGGER = Logger.getLogger(XMPPconnector.class);
 
-    private static final String UNABLE_TO_CONNECT_MSG = asErrLine("unable to connect");
 
     XMPPconnector() {
     }

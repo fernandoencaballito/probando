@@ -17,6 +17,8 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
@@ -24,121 +26,155 @@ import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 
-public  class FromServerParser extends GenericParser {
-	private enum OriginState{
-		CONNECTION_STABLISHED, STREAM_START_EXPECTED,FEATURES_END_EXPECTED,
-		CONNECTED
+public class FromServerParser extends GenericParser {
+	private enum OriginState {
+		CONNECTION_STABLISHED, STREAM_START_EXPECTED, FEATURES_END_EXPECTED, CONNECTED
 	};
+
 	private OriginState state;
 	private static String PROPERTIES_FILENAME = "./properties/serverParser.properties";
 	private static String INITIAL_TAG;
 	private static String START_AUTH_TAG;
 	private static String END_AUTH_TAG;
-	private static final String FEATURES="features";
-	public FromServerParser(ByteBuffer buf) throws XMLStreamException, FileNotFoundException {
+	private static final String FEATURES = "features";
+
+	public FromServerParser(ByteBuffer buf) throws XMLStreamException,
+			FileNotFoundException {
 		super(buf);
-		state= OriginState.CONNECTION_STABLISHED;
+		state = OriginState.CONNECTION_STABLISHED;
 		if (INITIAL_TAG == null)
 			loadPropertiesFile(PROPERTIES_FILENAME);
 	}
+
 	private void loadPropertiesFile(String fileName)
 			throws FileNotFoundException {
 		Properties properties = PropertiesFileLoader
 				.loadPropertiesFromFile(fileName);
 		INITIAL_TAG = properties.getProperty("INITIAL_TAG");
-		START_AUTH_TAG= properties.getProperty("START_AUTH_TAG");
-		END_AUTH_TAG=properties.getProperty("END_AUTH_TAG");
+		START_AUTH_TAG = properties.getProperty("START_AUTH_TAG");
+		END_AUTH_TAG = properties.getProperty("END_AUTH_TAG");
 	}
+
 	@Override
-	protected void processStreamElement(XMPPproxyState proxyState, Selector selector)
-			throws ClosedChannelException {
-		if(state==OriginState.STREAM_START_EXPECTED){
-			state=OriginState.FEATURES_END_EXPECTED;
-			
+	protected void processStreamElement(XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		if (state == OriginState.STREAM_START_EXPECTED) {
+			state = OriginState.FEATURES_END_EXPECTED;
+
+		} else if (state == OriginState.CONNECTED) {
+			// redirigir al cliente
+
+			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 		}
-		
+
 	}
 
 	@Override
 	protected void processStreamElementEnd(XMPPproxyState proxyState,
 			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void processAuthElementStart(XMPPproxyState proxyState,
 			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void processAuthElementEnd(XMPPproxyState proxyState,
 			Selector selector, XMPproxy protocol, AdminModule adminModule,
-			TCPReactor reactor) {
-		// TODO Auto-generated method stub
-		
+			TCPReactor reactor) throws ClosedChannelException,
+			XMLStreamException {
+
+		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 	}
 
 	@Override
 	protected void processMessageElementStart(XMPPproxyState proxyState,
 			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void processMessageElementEnd(XMPPproxyState proxyState,
 			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void processMessage_bodyStart(XMPPproxyState proxyState,
 			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	protected void processCharacters(String str, XMPPproxyState proxyState,
 			Selector selector) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	public void initiateStream(XMPPproxyState proxyState,
-			Selector selector) throws ClosedChannelException {
+
+	public void initiateStream(XMPPproxyState proxyState, Selector selector)
+			throws ClosedChannelException {
 		XMPPlistener.writeToOrigin(INITIAL_TAG, proxyState, selector);
-		state=OriginState.STREAM_START_EXPECTED;
+		state = OriginState.STREAM_START_EXPECTED;
 	}
+
 	@Override
 	protected void processOtherStartElement(XMPPproxyState proxyState,
-			Selector selector,String elementName) {
-		
-		if(state==OriginState.FEATURES_END_EXPECTED){
-			//escribir directamente
+			Selector selector) throws XMLStreamException,
+			ClosedChannelException {
+
+		if (state == OriginState.FEATURES_END_EXPECTED) {
+			// omitir
+			// TODO revisar en caso de que no soporte autenticacion plana
+		} else if (state == OriginState.CONNECTED) {
+			// redirigir al cliente
+
+			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 		}
-		
+
 	}
+
+	protected void passDirectlyToClient(XMPPproxyState proxyState,
+			Selector selector, AsyncXMLStreamReader reader)
+			throws XMLStreamException, ClosedChannelException {
+
+		String toClient = XMLconstructor.constructXML(reader);
+		XMPPlistener.writeToClient(toClient, proxyState, selector);
+	}
+
 	@Override
 	protected void processOtherEndElement(XMPPproxyState proxySstate,
-			Selector selector,String elementName) throws ClosedChannelException {
-		switch(elementName){
-		case FEATURES:{
-			state=OriginState.CONNECTED;
-			String autentication=START_AUTH_TAG+proxySstate.getUserPlainAuth()+END_AUTH_TAG;
-			XMPPlistener.writeToOrigin(autentication, proxySstate, selector);
+			Selector selector) throws ClosedChannelException {
+		String elementName = asyncXMLStreamReader.getLocalName();
+
+		switch (elementName) {
+		case FEATURES: {
+
+			if (state == OriginState.FEATURES_END_EXPECTED) {
+				state = OriginState.CONNECTED;
+				String autentication = START_AUTH_TAG
+						+ proxySstate.getUserPlainAuth() + END_AUTH_TAG;
+				XMPPlistener
+						.writeToOrigin(autentication, proxySstate, selector);
+
+			}
 			break;
-			
+
 		}
-		default:{
+		default: {
 			break;
 		}
-		
+
 		}
 	}
-	
 
 }
