@@ -63,8 +63,10 @@ public abstract class GenericParser {
 				type = asyncXMLStreamReader.next();
 
 				System.out.println("OCURRIO TIPO: " + type);
+				XMLconstructor.constructXML(asyncXMLStreamReader);
 				switch (type) {
-
+				
+				
 				case XMLEvent.START_DOCUMENT:
 				case 257: {
 					// IGNORAR
@@ -75,6 +77,8 @@ public abstract class GenericParser {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
 					processStartElement(state, selector);
+//					QName qname=asyncXMLStreamReader.getElementAsQName();
+//					System.out.println(asyncXMLStreamReader.getElementAsQName());
 					break;
 				}
 				case XMLEvent.CHARACTERS: {
@@ -164,7 +168,7 @@ public abstract class GenericParser {
 		}
 
 		default:{
-			processOtherStartElement(state,selector);
+			processOtherStartElement(state,selector,elementName);
 			break;
 		}
 		}
@@ -172,7 +176,7 @@ public abstract class GenericParser {
 	}
 
 	protected abstract void processOtherStartElement(XMPPproxyState state,
-			Selector selector);
+			Selector selector,String elementName);
 
 	// solo parar elemento STREAM:STREAM
 	protected abstract void processStreamElement(XMPPproxyState state,

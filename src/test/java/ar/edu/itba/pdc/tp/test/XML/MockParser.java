@@ -114,4 +114,19 @@ public class MockParser extends GenericParser {
 		
 	}
 
+	@Override
+	protected void processOtherEndElement(XMPPproxyState state,
+			Selector selector, String elementName)
+			throws ClosedChannelException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processOtherStartElement(XMPPproxyState state,
+			Selector selector, String elementName) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

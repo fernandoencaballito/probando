@@ -130,7 +130,7 @@ public class FromClientParser extends GenericParser {
 
 	@Override
 	protected void processOtherStartElement(XMPPproxyState state,
-			Selector selector) {
+			Selector selector,String elementName) {
 		// TODO Auto-generated method stub
 		
 	}

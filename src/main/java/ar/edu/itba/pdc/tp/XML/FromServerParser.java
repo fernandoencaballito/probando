@@ -52,7 +52,7 @@ public  class FromServerParser extends GenericParser {
 	@Override
 	protected void processStreamElement(XMPPproxyState proxyState, Selector selector)
 			throws ClosedChannelException {
-		if(state==OriginState.CONNECTION_STABLISHED){
+		if(state==OriginState.STREAM_START_EXPECTED){
 			state=OriginState.FEATURES_END_EXPECTED;
 			
 		}
@@ -114,9 +114,12 @@ public  class FromServerParser extends GenericParser {
 		state=OriginState.STREAM_START_EXPECTED;
 	}
 	@Override
-	protected void processOtherStartElement(XMPPproxyState state,
-			Selector selector) {
-		// TODO Auto-generated method stub
+	protected void processOtherStartElement(XMPPproxyState proxyState,
+			Selector selector,String elementName) {
+		
+		if(state==OriginState.FEATURES_END_EXPECTED){
+			//escribir directamente
+		}
 		
 	}
 	@Override
