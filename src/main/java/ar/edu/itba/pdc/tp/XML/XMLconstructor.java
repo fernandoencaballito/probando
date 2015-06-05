@@ -14,28 +14,37 @@ public class XMLconstructor {
 		int type = reader.getEventType();
 
 		String attributes = null;
+		String start = null;
+		String end = ">";
+		
+		//
 		switch (type) {
 		case XMLEvent.CHARACTERS: {
 			return reader.getText();
 		}
 
 		case XMLEvent.START_ELEMENT: {
-			ans = "<";
+			start = "<";
 
 			break;
 
 		}
 		case XMLEvent.END_ELEMENT: {
-			ans = "</";
+
+			start = "<";
 			break;
 		}
 		case XMLEvent.START_DOCUMENT: {
 
-			ans = "<?xml";
+			start = "<?xml";
 
 		}
 		}
-		if (type == XMLEvent.START_ELEMENT || type == XMLEvent.END_ELEMENT){
+		ans = start;
+		//
+		
+		//se agregan atributos y namespaces
+		if (type == XMLEvent.START_ELEMENT) {
 			ans += getElementName(reader);
 			String nameSpaces = getNamespaces(reader);
 			if (nameSpaces != null && !nameSpaces.isEmpty())
@@ -46,15 +55,21 @@ public class XMLconstructor {
 			if (attributes != null && !attributes.isEmpty())
 				ans += attributes;
 
-		}else if(type==XMLEvent.START_DOCUMENT){
-			ans+=" version=\"";
-			ans+=reader.getVersion();
-			ans+="\"?";
+		} else if (type == XMLEvent.END_ELEMENT) {
+			ans += getElementName(reader);
+
 		}
+
+		else if (type == XMLEvent.START_DOCUMENT) {
+			ans += " version=\"";
+			ans += reader.getVersion();
+			ans += "\"?";
+		}
+
+		if(reader.isEmptyElement())
+			end="/>";
 		
-		
-		
-		ans += ">";
+		ans += end;
 		return ans;
 	}
 

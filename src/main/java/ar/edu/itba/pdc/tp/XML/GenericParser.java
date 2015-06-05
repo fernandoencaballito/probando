@@ -63,7 +63,6 @@ public abstract class GenericParser {
 				type = asyncXMLStreamReader.next();
 
 				System.out.println("OCURRIO TIPO: " + type);
-				XMLconstructor.constructXML(asyncXMLStreamReader);
 				switch (type) {
 				
 				
@@ -82,8 +81,8 @@ public abstract class GenericParser {
 					break;
 				}
 				case XMLEvent.CHARACTERS: {
-					String str = asyncXMLStreamReader.getText().trim();
-					if (str.length() == 0)
+					String str = asyncXMLStreamReader.getText();
+					if (str==null || str.length() == 0)
 						break;// ignorar
 
 					System.out.println("characters :" + str);
