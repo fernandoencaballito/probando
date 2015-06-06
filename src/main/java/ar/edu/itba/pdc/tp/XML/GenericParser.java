@@ -33,7 +33,9 @@ public abstract class GenericParser {
 	private AsyncByteBufferFeeder feeder;
 
 	private int type;
-
+	
+	
+	
 	public GenericParser(ByteBuffer buf) throws XMLStreamException {
 
 		this.buffer = buf;
@@ -44,6 +46,7 @@ public abstract class GenericParser {
 
 		type = 0;
 	}
+	
 
 	public void feed() throws XMLStreamException {
 		if (feeder.needMoreInput())
@@ -56,7 +59,7 @@ public abstract class GenericParser {
 		uncompletedRead = true;
 
 		try {
-			while (!feeder.needMoreInput()) {
+			while (!feeder.needMoreInput() && asyncXMLStreamReader.hasNext()) {
 				uncompletedRead = false;
 				type = asyncXMLStreamReader.next();
 
@@ -110,8 +113,9 @@ public abstract class GenericParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if (!uncompletedRead)
+		if (!uncompletedRead){
 			buffer.clear();
+					}
 		this.finishPendingSends(proxyState,selector);
 
 	}

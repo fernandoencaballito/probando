@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Selector;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
-
-import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
@@ -26,7 +26,8 @@ public class FromClientParser extends GenericParser {
 	private ClientState state;
 	private static String PROPERTIES_FILENAME = "./properties/clientParser.properties";
 	private static String INITIAL_TAG;
-
+	private List<String> toClientQueue;
+	
 	public FromClientParser(ByteBuffer buf) throws XMLStreamException,
 			FileNotFoundException {
 		super(buf);
@@ -49,7 +50,8 @@ public class FromClientParser extends GenericParser {
 			Selector selector) throws ClosedChannelException {
 		if (state == ClientState.CONNECTION_STABLISHED) {
 
-			XMPPlistener.writeToClient(INITIAL_TAG, proxyState, selector);
+//			XMPPlistener.writeToClient(INITIAL_TAG, proxyState, selector);
+			enqueueForClient(INITIAL_TAG);
 			state = ClientState.AUTH_EXPECTED;
 		} else if (state == ClientState.CONNECTED_TO_ORIGIN) {
 			// ignorar
@@ -143,5 +145,29 @@ public class FromClientParser extends GenericParser {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	protected void finishPendingSends(XMPPproxyState proxySstate,
+			Selector selector) throws ClosedChannelException {
+		sendQueueForClient(proxySstate, selector);
+		this.toClientQueue=null;
+		
+	}
+	
+	private void enqueueForClient(String str){
+		if(toClientQueue ==null)
+			toClientQueue=new ArrayList<String>();
+		toClientQueue.add(str);
+	}
+	
+	private void sendQueueForClient(XMPPproxyState proxySstate,
+			Selector selector) throws ClosedChannelException{
+		if(toClientQueue!=null){
+			for(String current:toClientQueue){
+				XMPPlistener.writeToClient(current, proxySstate, selector);
+			}
+		}
+	}
+	
 
 }

@@ -52,7 +52,7 @@ public class XMPPproxyState {
 			throw new IllegalStateException();
 		}
 		this.originChannel = originChannel;
-		this.serverParser= new FromServerParser(originBuffer);
+//		this.serverParser= new FromServerParser(originBuffer);
 	}
 
 
@@ -156,7 +156,9 @@ public class XMPPproxyState {
 	
 
 
-	public FromServerParser getServerParser() {
+	public FromServerParser getServerParser() throws FileNotFoundException, XMLStreamException {
+		if(serverParser==null)
+			serverParser=new FromServerParser(originBuffer);
 		return serverParser;
 	}
 

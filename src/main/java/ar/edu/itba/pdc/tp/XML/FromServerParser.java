@@ -21,23 +21,23 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 public class FromServerParser extends GenericParser {
 	private enum OriginState {
-		CONNECTION_STABLISHED, STREAM_START_EXPECTED, FEATURES_END_EXPECTED, CONNECTED
+		 STREAM_START_EXPECTED, FEATURES_END_EXPECTED, CONNECTED
 	};
 
 	private OriginState state;
 	private static String PROPERTIES_FILENAME = "./properties/serverParser.properties";
-	private static String INITIAL_TAG;
+	
 	private static String START_AUTH_TAG;
 	private static String END_AUTH_TAG;
 	private static final String FEATURES = "features";
 
-	private List<String> sendToSeverQueue;
+	private List<String> queueToSever;
 
 	public FromServerParser(ByteBuffer buf) throws XMLStreamException,
 			FileNotFoundException {
 		super(buf);
-		state = OriginState.CONNECTION_STABLISHED;
-		if (INITIAL_TAG == null)
+		state = OriginState.STREAM_START_EXPECTED;
+		if (START_AUTH_TAG == null)
 			loadPropertiesFile(PROPERTIES_FILENAME);
 	}
 
@@ -45,7 +45,6 @@ public class FromServerParser extends GenericParser {
 			throws FileNotFoundException {
 		Properties properties = PropertiesFileLoader
 				.loadPropertiesFromFile(fileName);
-		INITIAL_TAG = properties.getProperty("INITIAL_TAG");
 		START_AUTH_TAG = properties.getProperty("START_AUTH_TAG");
 		END_AUTH_TAG = properties.getProperty("END_AUTH_TAG");
 	}
@@ -84,7 +83,7 @@ public class FromServerParser extends GenericParser {
 			Selector selector, XMPproxy protocol, AdminModule adminModule,
 			TCPReactor reactor) throws ClosedChannelException,
 			XMLStreamException {
-
+		if(state!=OriginState.FEATURES_END_EXPECTED)
 		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 	}
 
@@ -116,11 +115,6 @@ public class FromServerParser extends GenericParser {
 
 	}
 
-	public void initiateStream(XMPPproxyState proxyState, Selector selector)
-			throws ClosedChannelException {
-		XMPPlistener.writeToOrigin(INITIAL_TAG, proxyState, selector);
-		state = OriginState.STREAM_START_EXPECTED;
-	}
 
 	@Override
 	protected void processOtherStartElement(XMPPproxyState proxyState,
@@ -175,10 +169,10 @@ public class FromServerParser extends GenericParser {
 
 	// encola datos a enviar al origin server
 	private void enqueueForOrigin(String str){
-		if(sendToSeverQueue==null)
-			sendToSeverQueue=new ArrayList<String>();
+		if(queueToSever==null)
+			queueToSever=new ArrayList<String>();
 		
-		sendToSeverQueue.add(str);
+		queueToSever.add(str);
 		
 	}
 	
@@ -187,13 +181,13 @@ public class FromServerParser extends GenericParser {
 			Selector selector) throws ClosedChannelException{
 		
 		sendQueueForOrigin(proxySstate, selector);
-		this.sendToSeverQueue=null;
+		this.queueToSever=null;
 	}
 	
 	private void sendQueueForOrigin(XMPPproxyState proxySstate,
 			Selector selector) throws ClosedChannelException{
-		if(sendToSeverQueue!=null){
-			for(String current:sendToSeverQueue){
+		if(queueToSever!=null){
+			for(String current:queueToSever){
 				XMPPlistener.writeToOrigin(current, proxySstate, selector);
 			}
 				

@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.log4j.Logger;
 
 import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
@@ -28,8 +30,8 @@ class XMPPconnector implements TCPEventHandler {
                 LOGGER.info("Channel "
                         + state.getClientChannel().getRemoteAddress()
                         + " connected to origin server");
-              //  state.updateSubscription(key.selector());
-                state.getServerParser().initiateStream(state,key.selector());
+//                state.getServerParser().initiateStream(state,key.selector());
+                XMPPlistener.finishConnectToOrigin(state, key.selector());
             } else {
                 state.closeChannels();
             }
