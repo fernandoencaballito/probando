@@ -147,7 +147,7 @@ public class FromServerParser extends GenericParser {
 			Selector selector, AsyncXMLStreamReader reader)
 			throws XMLStreamException, ClosedChannelException {
 
-		String toClient = XMLconstructor.constructXML(reader);
+		String toClient = XMLconstructor.constructXML(asyncXMLStreamReader);
 		XMPPlistener.writeToClient(toClient, proxyState, selector);
 	}
 
