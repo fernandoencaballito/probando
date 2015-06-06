@@ -66,7 +66,9 @@ public abstract class GenericParser {
 				System.out.println("OCURRIO TIPO: " + type);
 				switch (type) {
 
-				case XMLEvent.START_DOCUMENT:
+				case XMLEvent.START_DOCUMENT:{
+					processStartDocuement(proxyState,selector);
+				}
 				case 257: {
 					// IGNORAR
 					break;
@@ -120,6 +122,11 @@ public abstract class GenericParser {
 
 	}
 
+	protected abstract void processStartDocuement(XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException, XMLStreamException ;
+		
+
+
 	protected abstract void finishPendingSends(XMPPproxyState proxySstate,
 			Selector selector) throws ClosedChannelException;
 
@@ -154,7 +161,7 @@ public abstract class GenericParser {
 	}
 
 	protected abstract void processOtherEndElement(XMPPproxyState state,
-			Selector selector) throws ClosedChannelException;
+			Selector selector) throws ClosedChannelException, XMLStreamException;
 
 	private void processStartElement(XMPPproxyState proxyState,
 			Selector selector) throws ClosedChannelException,
@@ -225,5 +232,6 @@ public abstract class GenericParser {
 	protected abstract void processCharacters(String str,
 			XMPPproxyState proxyState, Selector selector)
 			throws ClosedChannelException, XMLStreamException;
+	
 
 }

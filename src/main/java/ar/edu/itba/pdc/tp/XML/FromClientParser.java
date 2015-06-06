@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.management.RuntimeErrorException;
 import javax.xml.stream.XMLStreamException;
 
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
@@ -47,22 +48,23 @@ public class FromClientParser extends GenericParser {
 
 	@Override
 	protected void processStreamElement(XMPPproxyState proxyState,
-			Selector selector) throws ClosedChannelException {
+			Selector selector) throws ClosedChannelException, XMLStreamException {
 		if (state == ClientState.CONNECTION_STABLISHED) {
 
 //			XMPPlistener.writeToClient(INITIAL_TAG, proxyState, selector);
 			enqueueForClient(INITIAL_TAG);
 			state = ClientState.AUTH_EXPECTED;
 		} else if (state == ClientState.CONNECTED_TO_ORIGIN) {
-			// ignorar
+			passDirectlyToOriginServer(proxyState, selector);
 		}
 
 	}
 
 	@Override
 	protected void processStreamElementEnd(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException, XMLStreamException {
+		if(state==ClientState.CONNECTED_TO_ORIGIN)
+			passDirectlyToOriginServer(proxyState, selector);
 
 	}
 
@@ -72,7 +74,10 @@ public class FromClientParser extends GenericParser {
 		if (state == ClientState.AUTH_EXPECTED) {
 			state = ClientState.AUTH_VALUE_EXPECTED;
 		} else {
-			// error
+			//TODO error
+			//TODO ERROR!
+			throw new RuntimeException();
+		
 		}
 
 	}
@@ -81,50 +86,83 @@ public class FromClientParser extends GenericParser {
 	protected void processAuthElementEnd(XMPPproxyState proxyState,
 			Selector selector, XMPproxy protocol, AdminModule adminModule,
 			TCPReactor reactor) {
-		state = ClientState.CONNECTING_TO_ORIGIN;
-		// conectar al origin server
-		try {
-			XMPPlistener.connectToOrigin(proxyState, selector, adminModule,
-					protocol, reactor);
-			announceCorrectConnectToOrigin();
-		} catch (IOException | XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		if(state==ClientState.AUTH_END_EXPECTED){
+			state = ClientState.CONNECTING_TO_ORIGIN;
+			// conectar al origin server
+			try {
+				XMPPlistener.connectToOrigin(proxyState, selector, adminModule,
+						protocol, reactor);
+				announceCorrectConnectToOrigin();
+			} catch (IOException | XMLStreamException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
+		}else{
+			//TODO ERROR!
+			throw new RuntimeException();
+		}
+		
 	}
 
 	@Override
 	protected void processMessageElementStart(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException, XMLStreamException {
+		if(state==ClientState.CONNECTED_TO_ORIGIN)
+			passDirectlyToOriginServer(proxyState, selector);
+		else if(state==ClientState.CONNECTION_STABLISHED || 
+				state==ClientState.AUTH_EXPECTED
+				|| state==ClientState.AUTH_VALUE_EXPECTED
+				|| state==ClientState.AUTH_END_EXPECTED
+				|| state==ClientState.CONNECTING_TO_ORIGIN){
+			//TODO error!!!!
+			//TODO ERROR!
+			throw new RuntimeException();
+		}
+		
+
 
 	}
 
 	@Override
 	protected void processMessageElementEnd(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException, XMLStreamException {
+		if(state==ClientState.CONNECTED_TO_ORIGIN)
+			passDirectlyToOriginServer(proxyState, selector);
+		else{
+			//TODO error!!!!
+			//TODO ERROR!
+			throw new RuntimeException();
+		}
 
 	}
 
 	@Override
 	protected void processMessage_bodyStart(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException, XMLStreamException {
+		if(state==ClientState.CONNECTED_TO_ORIGIN)
+			passDirectlyToOriginServer(proxyState, selector);
+		else{
+			//TODO error!!!!
+			//TODO ERROR!
+			throw new RuntimeException();
+		}
 
 	}
 
 	@Override
 	protected void processCharacters(String str, XMPPproxyState proxyState,
-			Selector selector) {
+			Selector selector) throws ClosedChannelException, XMLStreamException {
 		if (state == ClientState.AUTH_VALUE_EXPECTED) {
 			// se tiene el usuario y la contraseña de autenticación
 			User user = Base64.getUser(str);
 			proxyState.setUser(user);
 			state = ClientState.AUTH_END_EXPECTED;
 			// conectar con el origin con el usuario especificado
-		}
+		}else if(state==ClientState.CONNECTED_TO_ORIGIN)
+			passDirectlyToOriginServer(proxyState, selector);
+		
 
 	}
 	
@@ -133,16 +171,28 @@ public class FromClientParser extends GenericParser {
 	}
 
 	@Override
-	protected void processOtherStartElement(XMPPproxyState state,
-			Selector selector) {
-		// TODO Auto-generated method stub
+	protected void processOtherStartElement(XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException, XMLStreamException {
+		if(state==ClientState.CONNECTED_TO_ORIGIN)
+			passDirectlyToOriginServer(proxyState, selector);
+		else{
+			//TODO error!!!!
+			//TODO ERROR!
+			throw new RuntimeException();
+		}
 		
 	}
 
 	@Override
-	protected void processOtherEndElement(XMPPproxyState state,
-			Selector selector) {
-		// TODO Auto-generated method stub
+	protected void processOtherEndElement(XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException, XMLStreamException {
+		if(state==ClientState.CONNECTED_TO_ORIGIN)
+			passDirectlyToOriginServer(proxyState, selector);
+		else{
+			//TODO error!!!!
+			//TODO ERROR!
+			throw new RuntimeException();
+		}
 		
 	}
 
@@ -168,6 +218,29 @@ public class FromClientParser extends GenericParser {
 			}
 		}
 	}
+
+	
+	
+		
+	protected void passDirectlyToOriginServer(XMPPproxyState proxyState,
+			Selector selector) throws XMLStreamException, ClosedChannelException{
+		String toClient = XMLconstructor.constructXML(asyncXMLStreamReader);
+		XMPPlistener.writeToOrigin(toClient, proxyState, selector);
+		
+		
+		
+	}
+
+	@Override
+	protected void processStartDocuement(XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException, XMLStreamException {
+		if(state==ClientState.CONNECTED_TO_ORIGIN)
+			passDirectlyToOriginServer(proxyState, selector);
+		
+		
+	}
+
+	
 	
 
 }

@@ -22,6 +22,7 @@ import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 public class XMPPlistener {
 	private static String INITIAL_TAG;
 	private static String PROPERTIES_FILENAME = "./properties/XMPPlistener.properties";
+	
 	public static void connectToOrigin(XMPPproxyState state, Selector selector,
 			AdminModule adminModule, XMPproxy protocol, TCPReactor reactor)
 			throws IOException, XMLStreamException {
