@@ -1,23 +1,14 @@
 package ar.edu.itba.pdc.tp.XML;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Selector;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.StartElement;
-
-import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
@@ -25,6 +16,8 @@ import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
 import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
+
+import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 public class FromServerParser extends GenericParser {
 	private enum OriginState {
@@ -37,6 +30,8 @@ public class FromServerParser extends GenericParser {
 	private static String START_AUTH_TAG;
 	private static String END_AUTH_TAG;
 	private static final String FEATURES = "features";
+
+	private List<String> sendToSeverQueue;
 
 	public FromServerParser(ByteBuffer buf) throws XMLStreamException,
 			FileNotFoundException {
@@ -163,8 +158,9 @@ public class FromServerParser extends GenericParser {
 				state = OriginState.CONNECTED;
 				String autentication = START_AUTH_TAG
 						+ proxySstate.getUserPlainAuth() + END_AUTH_TAG;
-				XMPPlistener
-						.writeToOrigin(autentication, proxySstate, selector);
+//				XMPPlistener
+//						.writeToOrigin(autentication, proxySstate, selector);
+				enqueueForOrigin(autentication);
 
 			}
 			break;
@@ -177,4 +173,15 @@ public class FromServerParser extends GenericParser {
 		}
 	}
 
+	// encola datos a enviar al origin server
+	private void enqueueForOrigin(String str){
+		if(sendToSeverQueue==null)
+			sendToSeverQueue=new ArrayList<String>();
+		
+		sendToSeverQueue.add(str);
+		
+	}
+	public void sendQueueForOrigin(XMPPproxyState proxySstate,
+			Selector selector)
+	
 }
