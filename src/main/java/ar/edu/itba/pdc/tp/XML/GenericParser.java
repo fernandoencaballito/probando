@@ -51,8 +51,8 @@ public abstract class GenericParser {
 
 	}
 
-	public void parse(XMPPproxyState state, Selector selector,
-			XMPproxy protocol, AdminModule adminModule, TCPReactor reactor) {
+	public void parse(XMPPproxyState proxyState, Selector selector,
+			XMPproxy protocol, AdminModule adminModule, TCPReactor reactor) throws ClosedChannelException {
 		uncompletedRead = true;
 
 		try {
@@ -72,7 +72,7 @@ public abstract class GenericParser {
 				case XMLEvent.START_ELEMENT: {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
-					processStartElement(state, selector);
+					processStartElement(proxyState, selector);
 					// QName qname=asyncXMLStreamReader.getElementAsQName();
 					// System.out.println(asyncXMLStreamReader.getElementAsQName());
 					break;
@@ -87,18 +87,18 @@ public abstract class GenericParser {
 						break;// ignorar
 
 					System.out.println("characters :" + str);
-					processCharacters(str, state, selector);
+					processCharacters(str, proxyState, selector);
 					break;
 				}
 				case XMLEvent.END_ELEMENT:
 					System.out.println("end element: "
 							+ asyncXMLStreamReader.getName());
-					processEndElement(state, selector, protocol, adminModule,
+					processEndElement(proxyState, selector, protocol, adminModule,
 							reactor);
 					break;
 				case XMLEvent.END_DOCUMENT:
 					System.out.println("end document");
-					processEndDocument(state, selector);
+					processEndDocument(proxyState, selector);
 					break;
 				default:
 					break;
@@ -110,10 +110,14 @@ public abstract class GenericParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if (!uncompletedRead && buffer.position() == 0)
+		if (!uncompletedRead)
 			buffer.clear();
+		this.finishPendingSends(proxyState,selector);
 
 	}
+
+	protected abstract void finishPendingSends(XMPPproxyState proxySstate,
+			Selector selector) throws ClosedChannelException;
 
 	private void processEndDocument(XMPPproxyState state, Selector selector) {
 		// TODO Auto-generated method stub

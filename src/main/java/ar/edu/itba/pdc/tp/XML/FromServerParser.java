@@ -181,7 +181,24 @@ public class FromServerParser extends GenericParser {
 		sendToSeverQueue.add(str);
 		
 	}
-	public void sendQueueForOrigin(XMPPproxyState proxySstate,
-			Selector selector)
+	
+	//metodo que termina mandando las cosas que estaban encoladas para ser enviadas
+	public void finishPendingSends(XMPPproxyState proxySstate,
+			Selector selector) throws ClosedChannelException{
+		
+		sendQueueForOrigin(proxySstate, selector);
+		this.sendToSeverQueue=null;
+	}
+	
+	private void sendQueueForOrigin(XMPPproxyState proxySstate,
+			Selector selector) throws ClosedChannelException{
+		if(sendToSeverQueue!=null){
+			for(String current:sendToSeverQueue){
+				XMPPlistener.writeToOrigin(current, proxySstate, selector);
+			}
+				
+		}
+			
+	}
 	
 }
