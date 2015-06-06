@@ -76,6 +76,7 @@ public class FromServerParser extends GenericParser {
 	protected void processAuthElementStart(XMPPproxyState proxyState,
 			Selector selector) throws ClosedChannelException,
 			XMLStreamException {
+		if(state!=OriginState.FEATURES_END_EXPECTED)
 		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
@@ -117,6 +118,7 @@ public class FromServerParser extends GenericParser {
 	protected void processCharacters(String str, XMPPproxyState proxyState,
 			Selector selector) throws ClosedChannelException,
 			XMLStreamException {
+		if(!(state==OriginState.STREAM_START_EXPECTED || state==OriginState.FEATURES_END_EXPECTED))
 		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
@@ -163,7 +165,7 @@ public class FromServerParser extends GenericParser {
 				// .writeToOrigin(autentication, proxySstate, selector);
 				enqueueForOrigin(autentication);
 
-			} else {
+			} else if(!(state==OriginState.STREAM_START_EXPECTED )){
 				passDirectlyToClient(proxySstate, selector,
 						asyncXMLStreamReader);
 			}
@@ -171,8 +173,8 @@ public class FromServerParser extends GenericParser {
 
 		}
 		default: {
-			
-			passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
+			if(!(state==OriginState.STREAM_START_EXPECTED || state==OriginState.FEATURES_END_EXPECTED))
+				passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
 			
 			break;
 		}
@@ -219,4 +221,5 @@ public class FromServerParser extends GenericParser {
 		
 	}
 
+	
 }

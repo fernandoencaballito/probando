@@ -147,10 +147,12 @@ public abstract class GenericParser {
 		}
 		case MESSAGE: {
 			processMessageElementEnd(state, selector);
+			break;
 		}
 		case AUTH: {
 			processAuthElementEnd(state, selector, protocol, adminModule,
 					reactor);
+			break;
 		}
 
 		default: {

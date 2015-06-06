@@ -145,7 +145,7 @@ public class XMPPproxyState {
 	}
 
 
-	public GenericParser getClientParser() throws FileNotFoundException, XMLStreamException {
+	public FromClientParser getClientParser() throws FileNotFoundException, XMLStreamException {
 		if(clientParser==null)
 			this.clientParser=new FromClientParser(clientBuffer);
 		
