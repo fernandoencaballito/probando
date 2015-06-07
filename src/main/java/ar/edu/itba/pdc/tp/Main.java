@@ -78,7 +78,7 @@ public class Main {
 					+ propertiesFileFullPath);
 		}catch(Exception e){
 //			e.printStackTrace();
-			LOGGER.error(e.printStackTrace(););
+//			LOGGER.error(e.printStackTrace(););
 		}
 	}
 

@@ -92,7 +92,7 @@ public class FromServerParser extends GenericParser {
 
 	@Override
 	protected void processMessageElementStart(XMPPproxyState proxyState,
-			Selector selector) throws ClosedChannelException,
+			Selector selector,AdminModule adminModule) throws ClosedChannelException,
 			XMLStreamException {
 		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
