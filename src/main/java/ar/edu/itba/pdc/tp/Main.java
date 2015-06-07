@@ -125,13 +125,13 @@ public class Main {
 		String default_multiplexing_str = properties.getProperty("multiplexing");
 		if(default_multiplexing_str==null)
 			throw new MissingPropertyException();
-		DEFAULT_MULTIPLEXING = new Boolean(default_multiplexing_str);
+		DEFAULT_MULTIPLEXING =Boolean.valueOf(default_multiplexing_str);
 
 		
 		String default_transformation_str=properties.getProperty("message_transformation");
 		if(default_transformation_str==null)
 			throw new MissingPropertyException();
-		DEFAULT_TRANSFORMATION = new Boolean(default_transformation_str);
+		DEFAULT_TRANSFORMATION =Boolean.valueOf(default_transformation_str);
 
 	}
 
