@@ -1,5 +1,6 @@
 package ar.edu.itba.pdc.tp.XML;
 
+import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Selector;
@@ -138,7 +139,7 @@ public abstract class GenericParser {
 
 	private void processEndElement(XMPPproxyState state, Selector selector,
 			XMPproxy protocol, AdminModule adminModule, TCPReactor reactor)
-			throws ClosedChannelException, XMLStreamException {
+			throws ClosedChannelException, XMLStreamException, FileNotFoundException {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
@@ -164,7 +165,7 @@ public abstract class GenericParser {
 	}
 
 	protected abstract void processOtherEndElement(XMPPproxyState state,
-			Selector selector) throws ClosedChannelException, XMLStreamException;
+			Selector selector) throws ClosedChannelException, XMLStreamException, FileNotFoundException;
 
 	private void processStartElement(XMPPproxyState proxyState,
 			Selector selector) throws ClosedChannelException,

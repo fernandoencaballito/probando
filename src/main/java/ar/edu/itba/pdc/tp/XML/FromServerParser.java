@@ -30,7 +30,7 @@ public class FromServerParser extends GenericParser {
 	private static String START_AUTH_TAG;
 	private static String END_AUTH_TAG;
 	private static final String FEATURES = "features";
-
+	private static final String SUCCESS="success";
 	private List<String> queueToSever;
 
 	public FromServerParser(ByteBuffer buf) throws XMLStreamException,
@@ -151,7 +151,7 @@ public class FromServerParser extends GenericParser {
 
 	@Override
 	protected void processOtherEndElement(XMPPproxyState proxySstate,
-			Selector selector) throws ClosedChannelException, XMLStreamException {
+			Selector selector) throws ClosedChannelException, XMLStreamException, FileNotFoundException {
 		String elementName = asyncXMLStreamReader.getLocalName();
 
 		switch (elementName) {
@@ -171,6 +171,15 @@ public class FromServerParser extends GenericParser {
 			}
 			break;
 
+		}
+		case SUCCESS:{
+			
+			if(state==OriginState.CONNECTED){
+				passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
+				proxySstate.restartStream();
+			}
+			
+			break;
 		}
 		default: {
 			if(!(state==OriginState.STREAM_START_EXPECTED || state==OriginState.FEATURES_END_EXPECTED))
@@ -219,6 +228,12 @@ public class FromServerParser extends GenericParser {
 			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 		}
 		
+	}
+
+	public FromServerParser reset(ByteBuffer originBuffer) throws FileNotFoundException, XMLStreamException {
+		FromServerParser newParser=new FromServerParser(originBuffer);
+		newParser.state=this.state;
+		return newParser;
 	}
 
 	

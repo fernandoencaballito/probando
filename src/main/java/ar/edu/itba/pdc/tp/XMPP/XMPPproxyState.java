@@ -174,6 +174,18 @@ public class XMPPproxyState {
 	}
 
 
+	public void restartStream() throws FileNotFoundException, XMLStreamException {
+		 originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
+		serverParser=serverParser.reset(originBuffer);
+		 
+		clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+		clientParser=clientParser.reset(clientBuffer);
+		
+		
+		
+	}
+
+
 	
 
 

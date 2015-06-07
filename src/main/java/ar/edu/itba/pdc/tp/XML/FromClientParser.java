@@ -240,6 +240,12 @@ public class FromClientParser extends GenericParser {
 		
 	}
 
+	public FromClientParser reset(ByteBuffer clientBuffer) throws FileNotFoundException, XMLStreamException {
+		FromClientParser newParser=new FromClientParser(clientBuffer);
+		newParser.state=this.state;
+		return newParser;
+	}
+
 	
 	
 
