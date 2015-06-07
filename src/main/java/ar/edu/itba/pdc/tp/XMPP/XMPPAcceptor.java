@@ -51,7 +51,8 @@ class XMPPAcceptor implements TCPEventHandler {
         //
 //       SocketChannel origin = SocketChannel.open();
 //        origin.configureBlocking(false);
-//        
+       //cuento accesos
+        adminModule.addAccess();
         state.updateSubscription(key.selector());
 
         reactor.subscribeChannel(clntChan, parent);

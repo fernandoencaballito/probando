@@ -35,7 +35,7 @@ class XMPPWriter implements TCPEventHandler {
         SocketChannel writeChannel = (SocketChannel) key.channel();
         try {
 			LOGGER.info(writeChannel.getLocalAddress() + " writing to " + writeChannel.getRemoteAddress());
-
+			adminModule.addBytesTransfered((buf.limit()-buf.position()));
 			writeChannel.write(buf);
 			
 	        buf.compact(); // Make room for more data to be read in
