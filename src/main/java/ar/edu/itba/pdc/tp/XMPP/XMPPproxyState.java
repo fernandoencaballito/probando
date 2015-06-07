@@ -10,6 +10,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -35,6 +36,8 @@ public class XMPPproxyState {
 	private FromServerParser serverParser;
 	private User user;
 
+	private boolean hasToResetStreams=false;
+	
 	XMPPproxyState(final SocketChannel clientChannel) throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
 			}
@@ -47,6 +50,13 @@ public class XMPPproxyState {
 		}
 	}
 
+	public boolean hasToReset(){
+		return hasToResetStreams;
+	}
+	public void flagReset(){
+		hasToResetStreams=true;
+	}
+	
 	void setOriginChannel(SocketChannel originChannel) throws FileNotFoundException, XMLStreamException {
 		if (this.originChannel != null) {
 			throw new IllegalStateException();
@@ -174,12 +184,16 @@ public class XMPPproxyState {
 	}
 
 
-	public void restartStream() throws FileNotFoundException, XMLStreamException {
-		 originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
-		serverParser=serverParser.reset(originBuffer);
-		 
-		clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
-		clientParser=clientParser.reset(clientBuffer);
+	public void resetStream() throws FileNotFoundException, XMLStreamException {
+		if(hasToResetStreams){
+			hasToResetStreams=false;
+			originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
+//			serverParser=serverParser.reset(originBuffer);
+			 
+			clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+//			clientParser=clientParser.reset(clientBuffer);
+				
+		}
 		
 		
 		

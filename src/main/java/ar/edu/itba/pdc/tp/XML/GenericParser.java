@@ -62,9 +62,9 @@ public abstract class GenericParser {
 		try {
 			while (!feeder.needMoreInput() && asyncXMLStreamReader.hasNext()) {
 				uncompletedRead = false;
-				
+				System.out.println(this.toString());
 				type = asyncXMLStreamReader.next();
-
+				
 				System.out.println("OCURRIO TIPO: " + type);
 				switch (type) {
 

@@ -133,7 +133,16 @@ public class FromServerParser extends GenericParser {
 			// TODO revisar en caso de que no soporte autenticacion plana
 		} else if (state == OriginState.CONNECTED) {
 			// redirigir al cliente
+			String elementName = asyncXMLStreamReader.getLocalName();
 
+
+			switch(elementName){
+			case SUCCESS:{
+				
+					proxyState.flagReset();
+				
+			}
+			}
 			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 		}
 
@@ -176,7 +185,7 @@ public class FromServerParser extends GenericParser {
 			
 			if(state==OriginState.CONNECTED){
 				passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
-				proxySstate.restartStream();
+				proxySstate.flagReset();
 			}
 			
 			break;

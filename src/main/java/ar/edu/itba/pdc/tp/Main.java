@@ -19,8 +19,8 @@ import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 public class Main {
 	// nombre del archivo de propiedades
 
-	private static String PROPERTIES_FILENAME = "./properties/proxyServer.properties";
-
+	private static String PROPERTIES_FILENAME = "proxyServer.properties";
+	private static String PROPERTIES_PATH="./properties/";
 	private static short ADMIN_PORT;
 	private static short PROXY_SERVER_PORT;
 	private static String PROXY_ADDRESS;
@@ -42,12 +42,13 @@ public class Main {
 		if (args.length == 1) {
 			PROPERTIES_FILENAME = args[0];
 		}
-
+		String propertiesFileFullPath=PROPERTIES_PATH+PROPERTIES_FILENAME;
 
 		try {
+			
 
-			loadPropertiesFile(PROPERTIES_FILENAME);
-			LOGGER.info("Properties file "+PROPERTIES_FILENAME + " was read correctly.");
+			loadPropertiesFile(propertiesFileFullPath);
+			LOGGER.info("Properties file "+propertiesFileFullPath + " was read correctly.");
 			//
 			
 			InetSocketAddress pop3_address = new InetSocketAddress(
@@ -75,7 +76,7 @@ public class Main {
 			reactor.start();
 		} catch (FileNotFoundException | MissingPropertyException e) {
 			LOGGER.error("Unable to read properties file: "
-					+ PROPERTIES_FILENAME);
+					+ propertiesFileFullPath);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
