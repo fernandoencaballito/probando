@@ -72,13 +72,14 @@ public class Main {
 			protocolHandlers.put(admin_address.getPort(), admin);
 
 			LOGGER.info("Proxy XMPP started...");
-
-			reactor.start();
+			
+		reactor.start();
 		} catch (FileNotFoundException | MissingPropertyException e) {
 			LOGGER.error("Unable to read properties file: "
 					+ propertiesFileFullPath);
 		}catch(Exception e){
-			e.printStackTrace();
+//			e.printStackTrace();
+			LOGGER.error(e.printStackTrace(););
 		}
 	}
 

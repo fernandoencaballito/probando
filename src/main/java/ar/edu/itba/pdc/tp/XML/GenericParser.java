@@ -79,7 +79,7 @@ public abstract class GenericParser {
 				case XMLEvent.START_ELEMENT: {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
-					processStartElement(proxyState, selector);
+					processStartElement(proxyState, selector,adminModule);
 					// QName qname=asyncXMLStreamReader.getElementAsQName();
 					// System.out.println(asyncXMLStreamReader.getElementAsQName());
 					break;
@@ -168,7 +168,7 @@ public abstract class GenericParser {
 			Selector selector) throws ClosedChannelException, XMLStreamException, FileNotFoundException;
 
 	private void processStartElement(XMPPproxyState proxyState,
-			Selector selector) throws ClosedChannelException,
+			Selector selector, AdminModule adminModule) throws ClosedChannelException,
 			XMLStreamException {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
@@ -178,7 +178,7 @@ public abstract class GenericParser {
 			break;
 		}
 		case MESSAGE: {
-			processMessageElementStart(proxyState, selector);
+			processMessageElementStart(proxyState, selector,adminModule);
 			break;
 		}
 		case AUTH: {
@@ -222,7 +222,7 @@ public abstract class GenericParser {
 			XMLStreamException;
 
 	protected abstract void processMessageElementStart(XMPPproxyState state,
-			Selector selector) throws ClosedChannelException,
+			Selector selector, AdminModule adminModule) throws ClosedChannelException,
 			XMLStreamException;
 
 	protected abstract void processMessageElementEnd(XMPPproxyState state,

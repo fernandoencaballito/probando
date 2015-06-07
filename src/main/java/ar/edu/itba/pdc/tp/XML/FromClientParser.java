@@ -108,7 +108,7 @@ public class FromClientParser extends GenericParser {
 
 	@Override
 	protected void processMessageElementStart(XMPPproxyState proxyState,
-			Selector selector) throws ClosedChannelException, XMLStreamException {
+			Selector selector, AdminModule adminModule) throws ClosedChannelException, XMLStreamException {
 		if(state==ClientState.CONNECTED_TO_ORIGIN)
 			passDirectlyToOriginServer(proxyState, selector);
 		else if(state==ClientState.CONNECTION_STABLISHED || 
