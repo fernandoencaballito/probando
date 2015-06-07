@@ -1,23 +1,14 @@
 package ar.edu.itba.pdc.tp.XML;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Selector;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.StartElement;
-
-import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
@@ -26,23 +17,27 @@ import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+
 public class FromServerParser extends GenericParser {
 	private enum OriginState {
-		CONNECTION_STABLISHED, STREAM_START_EXPECTED, FEATURES_END_EXPECTED, CONNECTED
+		STREAM_START_EXPECTED, FEATURES_END_EXPECTED, CONNECTED
 	};
 
 	private OriginState state;
 	private static String PROPERTIES_FILENAME = "./properties/serverParser.properties";
-	private static String INITIAL_TAG;
+
 	private static String START_AUTH_TAG;
 	private static String END_AUTH_TAG;
 	private static final String FEATURES = "features";
+	private static final String SUCCESS="success";
+	private List<String> queueToSever;
 
 	public FromServerParser(ByteBuffer buf) throws XMLStreamException,
 			FileNotFoundException {
 		super(buf);
-		state = OriginState.CONNECTION_STABLISHED;
-		if (INITIAL_TAG == null)
+		state = OriginState.STREAM_START_EXPECTED;
+		if (START_AUTH_TAG == null)
 			loadPropertiesFile(PROPERTIES_FILENAME);
 	}
 
@@ -50,7 +45,6 @@ public class FromServerParser extends GenericParser {
 			throws FileNotFoundException {
 		Properties properties = PropertiesFileLoader
 				.loadPropertiesFromFile(fileName);
-		INITIAL_TAG = properties.getProperty("INITIAL_TAG");
 		START_AUTH_TAG = properties.getProperty("START_AUTH_TAG");
 		END_AUTH_TAG = properties.getProperty("END_AUTH_TAG");
 	}
@@ -72,15 +66,18 @@ public class FromServerParser extends GenericParser {
 
 	@Override
 	protected void processStreamElementEnd(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
 
 	@Override
 	protected void processAuthElementStart(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		if(state!=OriginState.FEATURES_END_EXPECTED)
+		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
 
@@ -89,42 +86,41 @@ public class FromServerParser extends GenericParser {
 			Selector selector, XMPproxy protocol, AdminModule adminModule,
 			TCPReactor reactor) throws ClosedChannelException,
 			XMLStreamException {
-
-		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
+		if (state != OriginState.FEATURES_END_EXPECTED)
+			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 	}
 
 	@Override
 	protected void processMessageElementStart(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
 
 	@Override
 	protected void processMessageElementEnd(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
 
 	@Override
 	protected void processMessage_bodyStart(XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
 
 	@Override
 	protected void processCharacters(String str, XMPPproxyState proxyState,
-			Selector selector) {
-		// TODO Auto-generated method stub
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		if(!(state==OriginState.STREAM_START_EXPECTED || state==OriginState.FEATURES_END_EXPECTED))
+		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
-	}
-
-	public void initiateStream(XMPPproxyState proxyState, Selector selector)
-			throws ClosedChannelException {
-		XMPPlistener.writeToOrigin(INITIAL_TAG, proxyState, selector);
-		state = OriginState.STREAM_START_EXPECTED;
 	}
 
 	@Override
@@ -137,7 +133,16 @@ public class FromServerParser extends GenericParser {
 			// TODO revisar en caso de que no soporte autenticacion plana
 		} else if (state == OriginState.CONNECTED) {
 			// redirigir al cliente
+			String elementName = asyncXMLStreamReader.getLocalName();
 
+
+			switch(elementName){
+			case SUCCESS:{
+				
+					proxyState.flagReset();
+				
+			}
+			}
 			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 		}
 
@@ -147,13 +152,15 @@ public class FromServerParser extends GenericParser {
 			Selector selector, AsyncXMLStreamReader reader)
 			throws XMLStreamException, ClosedChannelException {
 
-		String toClient = XMLconstructor.constructXML(reader);
+		String toClient = XMLconstructor.constructXML(asyncXMLStreamReader);
 		XMPPlistener.writeToClient(toClient, proxyState, selector);
+		// byte [] data=asyncXMLStreamReader.getElementAsBinary();
+		// XMPPlistener.writeToClient(data, proxyState, selector);
 	}
 
 	@Override
 	protected void processOtherEndElement(XMPPproxyState proxySstate,
-			Selector selector) throws ClosedChannelException {
+			Selector selector) throws ClosedChannelException, XMLStreamException, FileNotFoundException {
 		String elementName = asyncXMLStreamReader.getLocalName();
 
 		switch (elementName) {
@@ -163,18 +170,80 @@ public class FromServerParser extends GenericParser {
 				state = OriginState.CONNECTED;
 				String autentication = START_AUTH_TAG
 						+ proxySstate.getUserPlainAuth() + END_AUTH_TAG;
-				XMPPlistener
-						.writeToOrigin(autentication, proxySstate, selector);
+				// XMPPlistener
+				// .writeToOrigin(autentication, proxySstate, selector);
+				enqueueForOrigin(autentication);
 
+			} else if(!(state==OriginState.STREAM_START_EXPECTED )){
+				passDirectlyToClient(proxySstate, selector,
+						asyncXMLStreamReader);
 			}
 			break;
 
 		}
+		case SUCCESS:{
+			
+			if(state==OriginState.CONNECTED){
+				passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
+				proxySstate.flagReset();
+			}
+			
+			break;
+		}
 		default: {
+			if(!(state==OriginState.STREAM_START_EXPECTED || state==OriginState.FEATURES_END_EXPECTED))
+				passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
+			
 			break;
 		}
 
 		}
 	}
 
+	// encola datos a enviar al origin server
+	private void enqueueForOrigin(String str) {
+		if (queueToSever == null)
+			queueToSever = new ArrayList<String>();
+
+		queueToSever.add(str);
+
+	}
+
+	// metodo que termina mandando las cosas que estaban encoladas para ser
+	// enviadas
+	public void finishPendingSends(XMPPproxyState proxySstate, Selector selector)
+			throws ClosedChannelException {
+
+		sendQueueForOrigin(proxySstate, selector);
+		this.queueToSever = null;
+	}
+
+	private void sendQueueForOrigin(XMPPproxyState proxySstate,
+			Selector selector) throws ClosedChannelException {
+		if (queueToSever != null) {
+			for (String current : queueToSever) {
+				XMPPlistener.writeToOrigin(current, proxySstate, selector);
+			}
+
+		}
+
+	}
+
+	@Override
+	protected void processStartDocuement(XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		if(state==OriginState.CONNECTED){
+			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
+		}
+		
+	}
+
+	public FromServerParser reset(ByteBuffer originBuffer) throws FileNotFoundException, XMLStreamException {
+		FromServerParser newParser=new FromServerParser(originBuffer);
+		newParser.state=this.state;
+		return newParser;
+	}
+
+	
 }

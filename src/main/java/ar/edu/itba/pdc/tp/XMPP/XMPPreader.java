@@ -67,7 +67,12 @@ class XMPPreader implements TCPEventHandler {
 		} else {
 			// servidor solicita lectura
 			writeChannel = proxyState.getClientChannel();
-			parser = proxyState.getServerParser();
+			try {
+				parser = proxyState.getServerParser();
+			} catch (XMLStreamException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 		}
 

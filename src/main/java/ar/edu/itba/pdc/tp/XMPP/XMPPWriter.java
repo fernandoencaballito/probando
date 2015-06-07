@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
@@ -38,11 +40,19 @@ class XMPPWriter implements TCPEventHandler {
 			adminModule.addBytesTransfered((buf.limit()-buf.position()));
 			writeChannel.write(buf);
 			
-	        buf.compact(); // Make room for more data to be read in
+	        
+	        if(proxyState.hasToReset()){
+	        	proxyState.resetStream();
+	        }else{
+	        	buf.compact(); // Make room for more data to be read in
+		        
+	        }
+	        
+	        
 //	        proxyState.updateSubscription(key.selector());
 	        writeChannel.register(key.selector(), SelectionKey.OP_READ, proxyState);
 			
-		} catch (IOException e) {
+		} catch (IOException | XMLStreamException e) {
 			LOGGER.error("Can't write on selected channel");
 		}
 //        if (!buf.hasRemaining()) { // Buffer completely written?

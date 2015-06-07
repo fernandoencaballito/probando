@@ -10,6 +10,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -35,6 +36,8 @@ public class XMPPproxyState {
 	private FromServerParser serverParser;
 	private User user;
 
+	private boolean hasToResetStreams=false;
+	
 	XMPPproxyState(final SocketChannel clientChannel) throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
 			}
@@ -47,12 +50,19 @@ public class XMPPproxyState {
 		}
 	}
 
+	public boolean hasToReset(){
+		return hasToResetStreams;
+	}
+	public void flagReset(){
+		hasToResetStreams=true;
+	}
+	
 	void setOriginChannel(SocketChannel originChannel) throws FileNotFoundException, XMLStreamException {
 		if (this.originChannel != null) {
 			throw new IllegalStateException();
 		}
 		this.originChannel = originChannel;
-		this.serverParser= new FromServerParser(originBuffer);
+//		this.serverParser= new FromServerParser(originBuffer);
 	}
 
 
@@ -145,7 +155,7 @@ public class XMPPproxyState {
 	}
 
 
-	public GenericParser getClientParser() throws FileNotFoundException, XMLStreamException {
+	public FromClientParser getClientParser() throws FileNotFoundException, XMLStreamException {
 		if(clientParser==null)
 			this.clientParser=new FromClientParser(clientBuffer);
 		
@@ -156,7 +166,9 @@ public class XMPPproxyState {
 	
 
 
-	public FromServerParser getServerParser() {
+	public FromServerParser getServerParser() throws FileNotFoundException, XMLStreamException {
+		if(serverParser==null)
+			serverParser=new FromServerParser(originBuffer);
 		return serverParser;
 	}
 
@@ -168,6 +180,22 @@ public class XMPPproxyState {
 	
 	public String getUserName(){
 		return this.user.getUsername();
+		
+	}
+
+
+	public void resetStream() throws FileNotFoundException, XMLStreamException {
+		if(hasToResetStreams){
+			hasToResetStreams=false;
+			originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
+//			serverParser=serverParser.reset(originBuffer);
+			 
+			clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+//			clientParser=clientParser.reset(clientBuffer);
+				
+		}
+		
+		
 		
 	}
 
