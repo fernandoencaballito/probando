@@ -59,7 +59,7 @@ public class Main {
 			Map<Integer, TCPProtocol> protocolHandlers = new HashMap<>();
 
 			AdminModule adminModule = new AdminModule(DEFAULT_ORIGIN_SERVER,
-					ORIGIN_SERVER_PORT);
+					ORIGIN_SERVER_PORT,DEFAULT_MULTIPLEXING,DEFAULT_TRANSFORMATION);
 
 			TCPReactorImpl reactor = new TCPReactorImpl(protocolHandlers,
 					DEFAULT_ORIGIN_SERVER);

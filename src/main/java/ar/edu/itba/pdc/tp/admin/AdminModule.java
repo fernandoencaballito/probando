@@ -23,12 +23,12 @@ public class AdminModule {
     private boolean transform;
     private boolean multiplexing;
 
-    public AdminModule(String defaultAddress, short defaultPort) {
+    public AdminModule(String defaultAddress, short defaultPort, boolean dEFAULT_MULTIPLEXING, boolean dEFAULT_TRANSFORMATION) {
         this.defaultAddress = new InetSocketAddress(defaultAddress, defaultPort);
         this.defaultPort = defaultPort;
         this.metrics = new Metrics();
-        this.transform = false;
-        this.multiplexing = false;
+        this.transform = dEFAULT_TRANSFORMATION;
+        this.multiplexing =dEFAULT_MULTIPLEXING;
     }
 
     public void addAccess() {

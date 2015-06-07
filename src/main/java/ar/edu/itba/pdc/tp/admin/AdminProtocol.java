@@ -42,6 +42,8 @@ public class AdminProtocol implements TCPProtocol {
     private static final String metricsAccessesRegex = "MET1\\r\\n";
     private static final String metricsTransferedRegex = "MET2\\r\\n";
     private static final String quitRegex = "QUIT\\r\\n";
+    private static final String local_part_validate="^[A-Z0-9._%+-]";
+    private static final String  invalid_jid="-ERR invalid user local part\r\n";
 
     private static final Pattern patternPass = Pattern.compile(passRegex);
     private static final Pattern patternMetricsAccesses = Pattern
@@ -173,7 +175,12 @@ public class AdminProtocol implements TCPProtocol {
                 ans = buildMetrics1Msg();
             }  else if (patternSilenceUser.matcher(fromUser).matches()) {
             	String user=(fromUser.split(" ")[1]).trim();
-                ans = SilenceUsermsg(user);
+            	if(user.matches(local_part_validate)){
+            		 ans = SilenceUsermsg(user);
+            	}
+            	else{
+            		ans=invalid_jid;
+            	}
             } else if (patternMetricsTransfered.matcher(fromUser).matches()) {
                 ans = buildMetrics2Msg();
             } else if (patternTransformationOff.matcher(fromUser).matches()) {
