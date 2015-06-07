@@ -1,6 +1,5 @@
 package ar.edu.itba.pdc.tp.XMPP;
 
-import static ar.edu.itba.pdc.tp.util.POP3Utils.asErrLine;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

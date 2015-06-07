@@ -239,10 +239,10 @@ public class FromServerParser extends GenericParser {
 		
 	}
 
-	public FromServerParser reset(ByteBuffer originBuffer) throws FileNotFoundException, XMLStreamException {
-		FromServerParser newParser=new FromServerParser(originBuffer);
-		newParser.state=this.state;
-		return newParser;
+	public void reset(ByteBuffer originBuffer) throws FileNotFoundException, XMLStreamException {
+		super.reset(originBuffer);
+		queueToSever=null;
+		
 	}
 
 	

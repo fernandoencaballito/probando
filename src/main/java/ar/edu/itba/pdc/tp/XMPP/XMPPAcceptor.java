@@ -1,6 +1,5 @@
 package ar.edu.itba.pdc.tp.XMPP;
 
-import static ar.edu.itba.pdc.tp.util.POP3Utils.asOkLine;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,7 +17,6 @@ import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
 class XMPPAcceptor implements TCPEventHandler {
-    private static final String GREETING_MSG = asOkLine("ready");
     private static final int BUFFER_SIZE = 4 * 1024;
     private final XMPproxy parent;
     private final TCPReactor reactor;

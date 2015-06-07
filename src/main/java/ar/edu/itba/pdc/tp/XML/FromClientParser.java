@@ -224,8 +224,8 @@ public class FromClientParser extends GenericParser {
 		
 	protected void passDirectlyToOriginServer(XMPPproxyState proxyState,
 			Selector selector) throws XMLStreamException, ClosedChannelException{
-		String toClient = XMLconstructor.constructXML(asyncXMLStreamReader);
-		XMPPlistener.writeToOrigin(toClient, proxyState, selector);
+		String toOrigin = XMLconstructor.constructXML(asyncXMLStreamReader);
+		XMPPlistener.writeToOrigin(toOrigin, proxyState, selector);
 		
 		
 		
@@ -240,10 +240,10 @@ public class FromClientParser extends GenericParser {
 		
 	}
 
-	public FromClientParser reset(ByteBuffer clientBuffer) throws FileNotFoundException, XMLStreamException {
-		FromClientParser newParser=new FromClientParser(clientBuffer);
-		newParser.state=this.state;
-		return newParser;
+	public  void reset(ByteBuffer clientBuffer) throws FileNotFoundException, XMLStreamException {
+		super.reset(clientBuffer);
+		
+		toClientQueue=null;
 	}
 
 	

@@ -31,7 +31,7 @@ public class XMLconstructor {
 		}
 		case XMLEvent.END_ELEMENT: {
 
-			start = "<";
+			start = "</";
 			break;
 		}
 		case XMLEvent.START_DOCUMENT: {

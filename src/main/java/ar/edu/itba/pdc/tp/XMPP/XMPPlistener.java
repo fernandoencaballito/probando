@@ -56,8 +56,12 @@ public class XMPPlistener {
 	public static void writeToOrigin(byte[] array, XMPPproxyState state,
 			Selector selector) throws ClosedChannelException {
 		ByteBuffer buffer = state.getOriginBuffer();
-		if (!(buffer.limit()==buffer.capacity() && buffer.position()==0))
+		int arraySize=array.length;
+		if (!(buffer.limit()==buffer.capacity() && buffer.position()==0)){
+			buffer.flip();
 			buffer.compact();
+		}
+			
 		buffer.put(array);
 		state.getOriginChannel().register(selector, SelectionKey.OP_WRITE,
 				state);
@@ -71,8 +75,10 @@ public class XMPPlistener {
 	public static void writeToClient(byte[] array, XMPPproxyState state,
 			Selector selector) throws ClosedChannelException {
 		ByteBuffer buffer = state.getClientBuffer();
-		if (!(buffer.limit()==buffer.capacity() && buffer.position()==0))//no se hizo un clear previamente
+		if (!(buffer.limit()==buffer.capacity() && buffer.position()==0)){//no se hizo un clear previamente
+			buffer.flip();
 			buffer.compact();
+		}
 		buffer.put(array);
 		state.getClientChannel().register(selector, SelectionKey.OP_WRITE,
 				state);
