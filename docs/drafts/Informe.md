@@ -130,10 +130,6 @@ $ sudo apt-get install oracle-java8-installer
 debe ejecutar el el comando "mvn package". Este comando del programa Maven crea 
 un jar ejecutable de nombre uber-tp-0.0.1-SNAPSHOT.jar  dentro de la carpeta target 
 (en la raíz del proyecto).
-4. Copiar el archivo "XMPPproxy.conf" ( se encuentra en la raíz del proyecto)  en el 
-directorio "/etc/init".Luego modificar el archivo "pop3proxy.conf" recién copiado, 
-cambiando el valor que tiene asignada la variable JARPATH por la ubicación absoluta 
-en la que se encuentra el archivo jar que se obtiene al compilar el proyecto en maven. 
 
 # Instrucciones para la configuración.
 

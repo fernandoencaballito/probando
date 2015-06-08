@@ -63,11 +63,11 @@ public class Main {
 			TCPReactorImpl reactor = new TCPReactorImpl(protocolHandlers,
 					DEFAULT_ORIGIN_SERVER);
 
-			XMPproxy pop3Proxy = new XMPproxy(reactor, adminModule);
+			XMPproxy xmppProxy = new XMPproxy(reactor, adminModule,BUFFER_SIZE);
 			AdminProtocol admin = new AdminProtocol(reactor, BUFFER_SIZE,
 					adminModule);
 
-			protocolHandlers.put(pop3_address.getPort(), pop3Proxy);
+			protocolHandlers.put(pop3_address.getPort(), xmppProxy);
 			protocolHandlers.put(admin_address.getPort(), admin);
 
 			LOGGER.info("Proxy XMPP started...");

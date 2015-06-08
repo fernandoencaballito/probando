@@ -22,11 +22,11 @@ import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.XML.User;
 
 public class XMPPproxyState {
-	private static final int BUFF_SIZE = 4 * 1024;
+	private  int BUFF_SIZE ;
 
-	private  ByteBuffer originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
+	private  ByteBuffer originBuffer ;
 	
-	private  ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+	private  ByteBuffer clientBuffer ;
 
 	private final SocketChannel clientChannel;
 	private SocketChannel originChannel = null;
@@ -40,8 +40,11 @@ public class XMPPproxyState {
 	private boolean hastToResetClientParser=false;
 
 	private boolean hastToResetOriginParser=false;
-	XMPPproxyState(final SocketChannel clientChannel) throws FileNotFoundException, XMLStreamException {
+	XMPPproxyState(final SocketChannel clientChannel,int bufferSize) throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
+		this.BUFF_SIZE=bufferSize;
+		originBuffer= ByteBuffer.allocate(BUFF_SIZE);
+		clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
 			}
 
 	

@@ -1,20 +1,20 @@
 package ar.edu.itba.pdc.tp.test.XML;
 
+import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.Selector;
 
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.StartElement;
-
-import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 import ar.edu.itba.pdc.tp.XML.GenericParser;
-import ar.edu.itba.pdc.tp.XMPP.XMPPlistener;
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
 import ar.edu.itba.pdc.tp.admin.AdminModule;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
+
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+
 
 public class MockParser extends GenericParser {
 
@@ -32,21 +32,24 @@ public class MockParser extends GenericParser {
 
 	@Override
 	protected void processStreamElement(XMPPproxyState state,
-			Selector selector, AsyncXMLStreamReader reader) throws ClosedChannelException {
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException{
 		this.streamElementStart = true;
 
 	}
 
 	@Override
 	protected void processStreamElementEnd(XMPPproxyState state,
-			Selector selector, AsyncXMLStreamReader reader) {
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
 		streamElementEnd = true;
 
 	}
 
 	@Override
 	protected void processAuthElementStart(XMPPproxyState state,
-			Selector selector, AsyncXMLStreamReader reader) {
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
 		authElementStart = true;
 
 	}
@@ -60,7 +63,8 @@ public class MockParser extends GenericParser {
 
 	@Override
 	protected void processMessageElementStart(XMPPproxyState state,
-			Selector selector, AsyncXMLStreamReader reader) {
+			Selector selector, AdminModule adminModule) throws ClosedChannelException,
+			XMLStreamException {
 		messageElementStart = true;
 	}
 
@@ -73,8 +77,9 @@ public class MockParser extends GenericParser {
 	}
 
 	@Override
-	protected void processMessageElementEnd (XMPPproxyState state,
-			Selector selector, AsyncXMLStreamReader reader){
+	protected void processMessageElementEnd(XMPPproxyState state,
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException{
 		messageElementEnd = true;
 	}
 
@@ -103,32 +108,56 @@ public class MockParser extends GenericParser {
 	}
 
 	@Override
-	protected void processMessage_bodyStart (XMPPproxyState state,
-			Selector selector, AsyncXMLStreamReader reader){
+	protected void processMessage_bodyStart(XMPPproxyState state,
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException{
 		message_bodySTART=true;
 		
 	}
 
 	@Override
-	protected void processCharacters(String str,
-			XMPPproxyState proxyState, Selector selector, AsyncXMLStreamReader reader) {
+	protected void processStartDocuement(XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void finishPendingSends(XMPPproxyState proxySstate,
+			Selector selector) throws ClosedChannelException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	protected void processOtherEndElement(XMPPproxyState state,
-			Selector selector, String elementName)
-			throws ClosedChannelException {
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException, FileNotFoundException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	protected void processOtherStartElement(XMPPproxyState state,
-			Selector selector, String elementName) {
+			Selector selector) throws XMLStreamException,
+			ClosedChannelException {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	protected void processCharacters(String str, XMPPproxyState proxyState,
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+
+	
+
+	
 
 }
