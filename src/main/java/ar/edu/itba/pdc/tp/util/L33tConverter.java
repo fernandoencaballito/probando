@@ -1,29 +1,16 @@
 package ar.edu.itba.pdc.tp.util;
 
+import org.apache.commons.lang3.StringUtils;
+
+
 public class L33tConverter {
+	private static final String[] searchList={"a","e","i","o","c"};
+	 private static final String[] replacementList={"4","3","1","0",">"};
 	
 	public static String leetify(String message) {
-		char[] msg = message.toCharArray();
-		for (int i = 0; i < message.length(); i++) {
-			switch (msg[i]) {
-			case 'a':
-				msg[i] = '4';
-				break;
-			case 'e':
-				msg[i] = '3';
-				break;
-			case 'i':
-				msg[i] = '1';
-				break;
-			case 'o':
-				msg[i] = '0';
-				break;
-			case 'c':
-				msg[i] = '<';
-				break;
-			}
-		}
-		return String.valueOf(msg);
+
+		 
+		return StringUtils.replaceEach(message, searchList, replacementList);
 	}
 
 }

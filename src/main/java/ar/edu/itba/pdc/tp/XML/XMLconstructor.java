@@ -4,6 +4,8 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 public class XMLconstructor {
@@ -20,7 +22,7 @@ public class XMLconstructor {
 		//
 		switch (type) {
 		case XMLEvent.CHARACTERS: {
-			return reader.getText();
+			return StringEscapeUtils.escapeXml11(reader.getText());
 		}
 
 		case XMLEvent.START_ELEMENT: {

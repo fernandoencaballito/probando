@@ -55,7 +55,7 @@ public class Main {
 			InetSocketAddress admin_address = new InetSocketAddress(
 					PROXY_ADDRESS, ADMIN_PORT);
 
-			Map<Integer, TCPProtocol> protocolHandlers = new HashMap<>();
+			Map<Integer, TCPProtocol> protocolHandlers = new HashMap<Integer, TCPProtocol>();
 
 			AdminModule adminModule = new AdminModule(DEFAULT_ORIGIN_SERVER,
 					ORIGIN_SERVER_PORT,DEFAULT_MULTIPLEXING,DEFAULT_TRANSFORMATION);

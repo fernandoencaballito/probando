@@ -1,12 +1,12 @@
 package ar.edu.itba.pdc.tp.admin;
 
-import java.awt.List;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import ar.edu.itba.pdc.tp.XML.User;
 
 /*
  * Clase que contiene objetos que comparten los protocolos de proxy y de administración.
@@ -96,6 +96,12 @@ public class AdminModule {
 	public void changeUserOriginServer(String user, String origin, int port) {
 	 destinyServerByUser.put(user,"destinyServer");
 		
+	}
+	
+	public boolean isUserSilenced(String username){
+		if(silencedUsers==null)
+			return false;
+		return silencedUsers.contains(username);
 	}
 
 }
