@@ -55,7 +55,7 @@ public class Main {
 			InetSocketAddress admin_address = new InetSocketAddress(
 					PROXY_ADDRESS, ADMIN_PORT);
 
-			Map<Integer, TCPProtocol> protocolHandlers = new HashMap<>();
+			Map<Integer, TCPProtocol> protocolHandlers = new HashMap<Integer, TCPProtocol>();
 
 			AdminModule adminModule = new AdminModule(DEFAULT_ORIGIN_SERVER,
 					ORIGIN_SERVER_PORT,DEFAULT_MULTIPLEXING,DEFAULT_TRANSFORMATION);
@@ -63,21 +63,22 @@ public class Main {
 			TCPReactorImpl reactor = new TCPReactorImpl(protocolHandlers,
 					DEFAULT_ORIGIN_SERVER);
 
-			XMPproxy pop3Proxy = new XMPproxy(reactor, adminModule);
+			XMPproxy xmppProxy = new XMPproxy(reactor, adminModule,BUFFER_SIZE);
 			AdminProtocol admin = new AdminProtocol(reactor, BUFFER_SIZE,
 					adminModule);
 
-			protocolHandlers.put(pop3_address.getPort(), pop3Proxy);
+			protocolHandlers.put(pop3_address.getPort(), xmppProxy);
 			protocolHandlers.put(admin_address.getPort(), admin);
 
 			LOGGER.info("Proxy XMPP started...");
-
-			reactor.start();
+			
+		reactor.start();
 		} catch (FileNotFoundException | MissingPropertyException e) {
 			LOGGER.error("Unable to read properties file: "
 					+ propertiesFileFullPath);
 		}catch(Exception e){
-			e.printStackTrace();
+//			e.printStackTrace();
+//			LOGGER.error(e.printStackTrace(););
 		}
 	}
 

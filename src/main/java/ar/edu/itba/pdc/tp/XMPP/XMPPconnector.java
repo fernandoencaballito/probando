@@ -1,6 +1,5 @@
 package ar.edu.itba.pdc.tp.XMPP;
 
-import static ar.edu.itba.pdc.tp.util.POP3Utils.asErrLine;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,7 +28,7 @@ class XMPPconnector implements TCPEventHandler {
                
                 LOGGER.info("Channel "
                         + state.getClientChannel().getRemoteAddress()
-                        + " connected to origin server");
+                        + " connected to origin server "+state.getOriginChannel().getRemoteAddress());
 //                state.getServerParser().initiateStream(state,key.selector());
                 XMPPlistener.finishConnectToOrigin(state, key.selector());
                 state.getClientParser().announceCorrectConnectToOrigin();

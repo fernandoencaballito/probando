@@ -1,6 +1,5 @@
 package ar.edu.itba.pdc.tp.XMPP;
 
-import static ar.edu.itba.pdc.tp.util.POP3Utils.asOkLine;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,17 +17,17 @@ import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 
 class XMPPAcceptor implements TCPEventHandler {
-    private static final String GREETING_MSG = asOkLine("ready");
-    private static final int BUFFER_SIZE = 4 * 1024;
+    private static int BUFFER_SIZE ;
     private final XMPproxy parent;
     private final TCPReactor reactor;
     private AdminModule adminModule;
     private static final Logger LOGGER = Logger.getLogger(XMPPAcceptor.class);
 
-    XMPPAcceptor(XMPproxy parent, TCPReactor reactor, AdminModule admMod) {
+    XMPPAcceptor(XMPproxy parent, TCPReactor reactor, AdminModule admMod, int bufferSize) {
         this.reactor = reactor;
         this.parent = parent;
         this.adminModule = admMod;
+        this.BUFFER_SIZE=bufferSize;
     }
 
     @Override
@@ -41,7 +40,7 @@ class XMPPAcceptor implements TCPEventHandler {
         // buffer
         XMPPproxyState state=null;
 		try {
-			state = new XMPPproxyState(clntChan);
+			state = new XMPPproxyState(clntChan,BUFFER_SIZE);
 		} catch (XMLStreamException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -11,6 +11,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.print.attribute.standard.Severity;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -19,14 +20,13 @@ import ar.edu.itba.pdc.tp.XML.FromClientParser;
 import ar.edu.itba.pdc.tp.XML.FromServerParser;
 import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.XML.User;
-import ar.edu.itba.pdc.tp.email.EmailConverter;
 
 public class XMPPproxyState {
-	private static final int BUFF_SIZE = 4 * 1024;
+	private  int BUFF_SIZE ;
 
-	private  ByteBuffer originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
+	private  ByteBuffer originBuffer ;
 	
-	private  ByteBuffer clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+	private  ByteBuffer clientBuffer ;
 
 	private final SocketChannel clientChannel;
 	private SocketChannel originChannel = null;
@@ -37,9 +37,14 @@ public class XMPPproxyState {
 	private User user;
 
 	private boolean hasToResetStreams=false;
-	
-	XMPPproxyState(final SocketChannel clientChannel) throws FileNotFoundException, XMLStreamException {
+	private boolean hastToResetClientParser=false;
+
+	private boolean hastToResetOriginParser=false;
+	XMPPproxyState(final SocketChannel clientChannel,int bufferSize) throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
+		this.BUFF_SIZE=bufferSize;
+		originBuffer= ByteBuffer.allocate(BUFF_SIZE);
+		clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
 			}
 
 	
@@ -158,6 +163,10 @@ public class XMPPproxyState {
 	public FromClientParser getClientParser() throws FileNotFoundException, XMLStreamException {
 		if(clientParser==null)
 			this.clientParser=new FromClientParser(clientBuffer);
+		else if(hastToResetClientParser){
+			hastToResetClientParser=false;
+			clientParser.reset(clientBuffer);
+		}
 		
 		return clientParser;
 		
@@ -169,6 +178,10 @@ public class XMPPproxyState {
 	public FromServerParser getServerParser() throws FileNotFoundException, XMLStreamException {
 		if(serverParser==null)
 			serverParser=new FromServerParser(originBuffer);
+		else if(hastToResetOriginParser){
+			hastToResetOriginParser=false;
+			serverParser.reset(originBuffer);
+		}
 		return serverParser;
 	}
 
@@ -187,10 +200,14 @@ public class XMPPproxyState {
 	public void resetStream() throws FileNotFoundException, XMLStreamException {
 		if(hasToResetStreams){
 			hasToResetStreams=false;
-			originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
+			hastToResetOriginParser=true;
+			originBuffer.clear();
+//			originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
 //			serverParser=serverParser.reset(originBuffer);
 			 
-			clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+			hastToResetClientParser=true;
+			clientBuffer.clear();
+//			clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
 //			clientParser=clientParser.reset(clientBuffer);
 				
 		}

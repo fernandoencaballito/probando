@@ -2,10 +2,6 @@ package ar.edu.itba.pdc.tp.XMPP;
 
 import static ar.edu.itba.pdc.tp.util.NIOUtils.append;
 import static ar.edu.itba.pdc.tp.util.NIOUtils.nonBlockingSocket;
-import static ar.edu.itba.pdc.tp.util.POP3Utils.ERR;
-import static ar.edu.itba.pdc.tp.util.POP3Utils.OK;
-import static ar.edu.itba.pdc.tp.util.POP3Utils.asErrLine;
-import static ar.edu.itba.pdc.tp.util.POP3Utils.asMultilines;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -23,7 +19,6 @@ import org.apache.log4j.Logger;
 
 import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.admin.AdminModule;
-import ar.edu.itba.pdc.tp.email.EmailConverter;
 import ar.edu.itba.pdc.tp.tcp.TCPEventHandler;
 import ar.edu.itba.pdc.tp.tcp.TCPReactor;
 import ar.edu.itba.pdc.tp.util.NIOUtils;

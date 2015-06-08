@@ -13,8 +13,8 @@ public class XMPproxy implements TCPProtocol{
 	private final XMPPreader reader;
 	private final XMPPWriter writer;
 
-	public XMPproxy(TCPReactor reactor, AdminModule adminModule) {
-		this.acceptor = new XMPPAcceptor(this, reactor,adminModule);
+	public XMPproxy(TCPReactor reactor, AdminModule adminModule, int bufferSize) {
+		this.acceptor = new XMPPAcceptor(this, reactor,adminModule,bufferSize);
 		this.connector = new XMPPconnector();
 		this.writer = new XMPPWriter(adminModule);
 		this.reader = new XMPPreader(this, reactor, adminModule);

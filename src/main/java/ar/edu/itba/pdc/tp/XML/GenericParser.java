@@ -9,6 +9,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
+
 import ar.edu.itba.pdc.tp.XMPP.XMPPproxyState;
 import ar.edu.itba.pdc.tp.XMPP.XMPproxy;
 import ar.edu.itba.pdc.tp.admin.AdminModule;
@@ -28,27 +29,36 @@ public abstract class GenericParser {
 	protected ByteBuffer buffer;
 
 	private boolean uncompletedRead = false;
-
+	private static AsyncXMLInputFactory xmlInputFactory = new InputFactoryImpl();
 	// aalto
 	protected AsyncXMLStreamReader<AsyncByteBufferFeeder> asyncXMLStreamReader;
 	private AsyncByteBufferFeeder feeder;
 
-	private int type;
 	
-	
+	private String lastEmptyElement=null;//string que se guarda para solucionar el caso en que Aalto interpreta un elemento vacio como uno que empieza y otro que termina.
 	
 	public GenericParser(ByteBuffer buf) throws XMLStreamException {
 
 		this.buffer = buf;
-		AsyncXMLInputFactory xmlInputFactory = new InputFactoryImpl();
 
-		asyncXMLStreamReader = xmlInputFactory.createAsyncFor(buf);
-		feeder = asyncXMLStreamReader.getInputFeeder();
+//		asyncXMLStreamReader = xmlInputFactory.createAsyncFor(buf);
+//		feeder = asyncXMLStreamReader.getInputFeeder();
+		initAalto();
 
-		type = 0;
 	}
 	
+	protected void reset(ByteBuffer newBuffer) throws XMLStreamException, FileNotFoundException{
+		this.buffer=newBuffer;
+		initAalto();
+		uncompletedRead=false;
 
+	}
+	private void initAalto() throws XMLStreamException{
+		asyncXMLStreamReader = xmlInputFactory.createAsyncFor(this.buffer);
+		feeder = asyncXMLStreamReader.getInputFeeder();
+
+	}
+	
 	public void feed() throws XMLStreamException {
 		if (feeder.needMoreInput())
 			feeder.feedInput(buffer);
@@ -58,7 +68,7 @@ public abstract class GenericParser {
 	public void parse(XMPPproxyState proxyState, Selector selector,
 			XMPproxy protocol, AdminModule adminModule, TCPReactor reactor) throws ClosedChannelException {
 		uncompletedRead = true;
-
+		int type;
 		try {
 			while (!feeder.needMoreInput() && asyncXMLStreamReader.hasNext()) {
 				uncompletedRead = false;
@@ -79,9 +89,10 @@ public abstract class GenericParser {
 				case XMLEvent.START_ELEMENT: {
 					System.out.println("start element: "
 							+ asyncXMLStreamReader.getName());
-					processStartElement(proxyState, selector);
-					// QName qname=asyncXMLStreamReader.getElementAsQName();
-					// System.out.println(asyncXMLStreamReader.getElementAsQName());
+					processStartElement(proxyState, selector,adminModule);
+					
+					if(asyncXMLStreamReader.isEmptyElement())
+						lastEmptyElement=asyncXMLStreamReader.getLocalName();
 					break;
 				}
 				case XMLEvent.CHARACTERS: {
@@ -100,8 +111,13 @@ public abstract class GenericParser {
 				case XMLEvent.END_ELEMENT:
 					System.out.println("end element: "
 							+ asyncXMLStreamReader.getName());
+					if(lastEmptyElement!=null && lastEmptyElement.equals(asyncXMLStreamReader.getLocalName())){//para solucionar problema de aalto con elementos vacios 
+						lastEmptyElement=null;
+						break;
+					}
 					processEndElement(proxyState, selector, protocol, adminModule,
 							reactor);
+					lastEmptyElement=null;
 					break;
 				case XMLEvent.END_DOCUMENT:
 					System.out.println("end document");
@@ -168,7 +184,7 @@ public abstract class GenericParser {
 			Selector selector) throws ClosedChannelException, XMLStreamException, FileNotFoundException;
 
 	private void processStartElement(XMPPproxyState proxyState,
-			Selector selector) throws ClosedChannelException,
+			Selector selector, AdminModule adminModule) throws ClosedChannelException,
 			XMLStreamException {
 		QName qname = asyncXMLStreamReader.getName();
 		String elementName = qname.getLocalPart();
@@ -178,7 +194,7 @@ public abstract class GenericParser {
 			break;
 		}
 		case MESSAGE: {
-			processMessageElementStart(proxyState, selector);
+			processMessageElementStart(proxyState, selector,adminModule);
 			break;
 		}
 		case AUTH: {
@@ -222,7 +238,7 @@ public abstract class GenericParser {
 			XMLStreamException;
 
 	protected abstract void processMessageElementStart(XMPPproxyState state,
-			Selector selector) throws ClosedChannelException,
+			Selector selector, AdminModule adminModule) throws ClosedChannelException,
 			XMLStreamException;
 
 	protected abstract void processMessageElementEnd(XMPPproxyState state,
