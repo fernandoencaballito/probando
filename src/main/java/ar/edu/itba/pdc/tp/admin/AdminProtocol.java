@@ -21,6 +21,8 @@ public class AdminProtocol implements TCPProtocol {
     private AdminModule reactorState;
 
     private final String ADMIN_PASSWORD = "password";
+	private static final String CORRECT_UNSILENCE_MSG ="+OK unsilence user\r\n";;
+
     private static final String CORRECT_LOGIN_MSG = "+OK ready\r\n";
     private static final String CORRECT_SILENCE_MSG = "+OK silence user\r\n";
     private static final String INCORRECT_LOGIN_MSG = "-ERR wrong password\r\n";
@@ -32,7 +34,8 @@ public class AdminProtocol implements TCPProtocol {
     private static final String TRANSFORMATION_OFF_MSG = "+OK transformation of the subject is off \r\n";
     private static final String MULTIPLEXING_ON_MSG = "+OK accounts multiplexing is on\r\n";
     private static final String MULTIPLEXING_OFF_MSG = "+OK accounts multiplexing is off\r\n";
-    private static final String silenceUser="SILENCE\\s.*\\r\\n";
+    private static final String silenceUser="MUTEON\\s.*\\r\\n";
+    private static final String unsilenceUser="MUTEOFF\\s.*\\r\\n";
     private static final String changeUserOriginServer="SET\\s.*\\s.*\\s.*\\r\\n";
     private static final String transformationOffRegex = "TOFF\\r\\n";
     private static final String transformationOnRegex = "TON\\r\\n";
@@ -44,7 +47,8 @@ public class AdminProtocol implements TCPProtocol {
     private static final String quitRegex = "QUIT\\r\\n";
     private static final String local_part_validate="^[A-Z0-9._%+-]";
     private static final String  invalid_jid="-ERR invalid user local part\r\n";
-
+    
+    private static final Pattern patternUnsilenceUser = Pattern.compile(unsilenceUser);
     private static final Pattern patternPass = Pattern.compile(passRegex);
     private static final Pattern patternMetricsAccesses = Pattern
             .compile(metricsAccessesRegex);
@@ -195,6 +199,15 @@ public class AdminProtocol implements TCPProtocol {
             } else if (patternMultiplexingOff.matcher(fromUser).matches()) {
                 ans = MULTIPLEXING_OFF_MSG;
                 reactorState.multiplexingOff();
+            }else if(patternUnsilenceUser.matcher(fromUser).matches()){
+            	String user=(fromUser.split(" ")[1]).trim();
+            	if(user.matches(local_part_validate)){
+            		 ans = unSilenceUsermsg(user);
+            	}
+            	else{
+            		ans=invalid_jid;
+            	}
+            	
             }//else if ((userOriginUrl = (SetUserValidator.validate(fromUser))) != null) {
               //  reactorState.setOriginForUser(userOriginUrl.get(0),userOriginUrl.get(1),null);
              //   ans = CORRECT_OPERATION;
@@ -219,7 +232,12 @@ public class AdminProtocol implements TCPProtocol {
         return connected;
     }
 
-    private String changeOrigin(String user, String origin, String port) {
+    private String unSilenceUsermsg(String user) {
+    	reactorState.unSilence(user);
+		return CORRECT_UNSILENCE_MSG;
+	}
+
+	private String changeOrigin(String user, String origin, String port) {
     	System.out.println("puerto especificado "+port);
 		Integer originPort;
 		try{

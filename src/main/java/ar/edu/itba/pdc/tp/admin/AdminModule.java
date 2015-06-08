@@ -104,4 +104,10 @@ public class AdminModule {
 		return silencedUsers.contains(username);
 	}
 
+	public void unSilence(String user) {
+		if(silencedUsers!=null)
+		silencedUsers.remove(user);
+		
+	}
+
 }
