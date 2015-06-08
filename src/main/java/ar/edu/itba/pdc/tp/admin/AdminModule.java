@@ -98,4 +98,10 @@ public class AdminModule {
 		
 	}
 
+	public void unSilence(String user) {
+		if(silencedUsers!=null)
+		silencedUsers.remove(user);
+		
+	}
+
 }
