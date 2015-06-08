@@ -45,9 +45,11 @@ class XMPPreader implements TCPEventHandler {
 		final SocketChannel readChannel = (SocketChannel) key.channel();
 		final ByteBuffer readBuffer = proxyState.getReadBuffer(readChannel);
 
-		SocketChannel writeChannel = null;
 		GenericParser parser = null;
 		long bytesRead = readChannel.read(readBuffer);
+		LOGGER.info(readChannel.getLocalAddress() + " reading from " + readChannel.getRemoteAddress()+" "+bytesRead+"bytes.");
+		
+		
 		readBuffer.flip();
 		if (readChannel == proxyState.getClientChannel()) {
 			// cliente solicita lectura!!
@@ -61,7 +63,6 @@ class XMPPreader implements TCPEventHandler {
 
 		} else {
 			// servidor solicita lectura
-			writeChannel = proxyState.getClientChannel();
 			try {
 				parser = proxyState.getServerParser();
 			} catch (XMLStreamException e) {

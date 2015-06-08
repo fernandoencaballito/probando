@@ -39,6 +39,8 @@ public class XMPPproxyState {
 	private boolean hasToResetStreams=false;
 	private boolean hastToResetClientParser=false;
 
+	private String id;
+	
 	private boolean hastToResetOriginParser=false;
 	XMPPproxyState(final SocketChannel clientChannel,int bufferSize) throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
@@ -55,6 +57,14 @@ public class XMPPproxyState {
 		}
 	}
 
+	public void setId(String id){
+		this.id=id;
+	}
+	public String getId(){
+		return id;
+	}
+	
+	
 	public boolean hasToReset(){
 		return hasToResetStreams;
 	}
@@ -213,6 +223,21 @@ public class XMPPproxyState {
 		}
 		
 		
+		
+	}
+
+
+	public void setCompleteUserJID(String userJID) {
+		
+		this.user.setCompleteUserJID(userJID);
+		
+	}
+	
+	public String getCompleteUserJID(){
+		String ans=null;
+		if(user!=null)
+			ans=user.getCompleteUserJID();
+		return ans;
 		
 	}
 

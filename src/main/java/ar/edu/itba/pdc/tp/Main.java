@@ -59,7 +59,10 @@ public class Main {
 
 			AdminModule adminModule = new AdminModule(DEFAULT_ORIGIN_SERVER,
 					ORIGIN_SERVER_PORT,DEFAULT_MULTIPLEXING,DEFAULT_TRANSFORMATION);
-
+			//TODO borrar aca adentro
+//			adminModule.silence("protos1");
+			//
+			
 			TCPReactorImpl reactor = new TCPReactorImpl(protocolHandlers,
 					DEFAULT_ORIGIN_SERVER);
 

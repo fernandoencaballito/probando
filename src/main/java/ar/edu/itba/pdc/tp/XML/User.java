@@ -5,6 +5,7 @@ public class User {
 	private String username;
 	private String password;
 	private String plainAuth;
+	private String completeUserJID;
 	public User(String username, String password,String plainAuth) {
 		super();
 		this.username = username;
@@ -21,7 +22,12 @@ public class User {
 	public String getPlainAuth() {
 		return plainAuth;
 	}
-	
+	public void setCompleteUserJID(String completeUserJID) {
+		this.completeUserJID=completeUserJID;
+	}
+	public String getCompleteUserJID() {
+		return completeUserJID;
+	}
 	
 	
 }

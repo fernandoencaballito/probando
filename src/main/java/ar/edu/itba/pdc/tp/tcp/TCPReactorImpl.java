@@ -55,17 +55,7 @@ public class TCPReactorImpl implements TCPReactor {
 			if (waitForEvents(selector) == 0) { // returns # of ready chans
 				continue;
 			}
-//			LOGGER.info("KEYS:");
-//			for (SelectionKey key : selector.selectedKeys()) {
-//				System.out.println(new ToStringBuilder(key)
-//						.append("valid", key.isValid())
-//						.append("acceptable", key.isAcceptable())
-//						.append("readable", key.isReadable())
-//						.append("writable", key.isWritable())
-//						.append("connectable", key.isConnectable())
-//						.append("channel", key.channel())
-//						.append("attachment", key.attachment()).toString());
-//			}
+			
 			handleEvents(selector.selectedKeys().iterator());
 		}
 	}

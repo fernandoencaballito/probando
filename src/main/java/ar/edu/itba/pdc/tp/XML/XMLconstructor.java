@@ -127,6 +127,8 @@ public class XMLconstructor {
 
 				name = " " + reader.getAttributeName(i).getLocalPart();
 			}
+			System.out.println("NAMESPACE:");
+			System.out.println(reader.getAttributeNamespace(i));
 			ans += name + "=" + "\"" + reader.getAttributeValue(i) + "\"";
 		}
 

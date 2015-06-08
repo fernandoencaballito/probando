@@ -36,11 +36,11 @@ class XMPPWriter implements TCPEventHandler {
         buf.flip(); // Prepare buffer for writing
         SocketChannel writeChannel = (SocketChannel) key.channel();
         try {
-			LOGGER.info(writeChannel.getLocalAddress() + " writing to " + writeChannel.getRemoteAddress());
-			adminModule.addBytesTransfered((buf.limit()-buf.position()));
-			writeChannel.write(buf);
 			
-	        
+			int count=writeChannel.write(buf);
+			adminModule.addBytesTransfered(count);
+			LOGGER.info(writeChannel.getLocalAddress() + " writing to " + writeChannel.getRemoteAddress()+" "+count+"bytes.");
+			
 	        if(proxyState.hasToReset()){
 	        	proxyState.resetStream();
 	        }else{

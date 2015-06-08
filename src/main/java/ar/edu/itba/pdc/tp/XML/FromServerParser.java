@@ -24,7 +24,8 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 
 public class FromServerParser extends GenericParser {
 	private enum OriginState {
-		STREAM_START_EXPECTED, FEATURES_END_EXPECTED, CONNECTED,IN_MESSAGE,IN_BODY,IN_MUTED_MESSAGE
+		STREAM_START_EXPECTED, FEATURES_END_EXPECTED, CONNECTED, IN_MESSAGE, IN_BODY, 
+		IN_MUTED_MESSAGE, IN_USER_JID, EXPECTING_JID_END
 	};
 
 	private OriginState state;
@@ -33,8 +34,9 @@ public class FromServerParser extends GenericParser {
 	private static String START_AUTH_TAG;
 	private static String END_AUTH_TAG;
 	private static final String FEATURES = "features";
-	private static final String SUCCESS="success";
-	private static final String BODY="body";
+	private static final String SUCCESS = "success";
+	private static final String BODY = "body";
+	private static final String JID = "jid";
 	private List<String> queueToSever;
 
 	public FromServerParser(ByteBuffer buf) throws XMLStreamException,
@@ -60,7 +62,8 @@ public class FromServerParser extends GenericParser {
 		if (state == OriginState.STREAM_START_EXPECTED) {
 			state = OriginState.FEATURES_END_EXPECTED;
 
-		} else if (state == OriginState.CONNECTED || state==OriginState.IN_MESSAGE) {
+		} else if (state == OriginState.CONNECTED
+				|| state == OriginState.IN_MESSAGE) {
 			// redirigir al cliente
 
 			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
@@ -80,8 +83,8 @@ public class FromServerParser extends GenericParser {
 	protected void processAuthElementStart(XMPPproxyState proxyState,
 			Selector selector) throws ClosedChannelException,
 			XMLStreamException {
-		if(state!=OriginState.FEATURES_END_EXPECTED)
-		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
+		if (state != OriginState.FEATURES_END_EXPECTED)
+			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
 
@@ -96,13 +99,12 @@ public class FromServerParser extends GenericParser {
 
 	@Override
 	protected void processMessageElementStart(XMPPproxyState proxyState,
-			Selector selector,AdminModule adminModule) throws ClosedChannelException,
-			XMLStreamException {
-		if(state==OriginState.CONNECTED 
-				&& adminModule.isTransformationOn()
+			Selector selector, AdminModule adminModule)
+			throws ClosedChannelException, XMLStreamException {
+		if (state == OriginState.CONNECTED && adminModule.isTransformationOn()
 				&& !adminModule.isUserSilenced(proxyState.getUserName()))
-			state=OriginState.IN_MESSAGE;
-		
+			state = OriginState.IN_MESSAGE;
+
 		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
@@ -119,9 +121,9 @@ public class FromServerParser extends GenericParser {
 	protected void processMessage_bodyStart(XMPPproxyState proxyState,
 			Selector selector) throws ClosedChannelException,
 			XMLStreamException {
-		
-		if(state==OriginState.IN_MESSAGE)
-			state=OriginState.IN_BODY;
+
+		if (state == OriginState.IN_MESSAGE)
+			state = OriginState.IN_BODY;
 		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
@@ -130,18 +132,22 @@ public class FromServerParser extends GenericParser {
 	protected void processCharacters(String str, XMPPproxyState proxyState,
 			Selector selector) throws ClosedChannelException,
 			XMLStreamException {
-		if(!(state==OriginState.STREAM_START_EXPECTED || state==OriginState.FEATURES_END_EXPECTED)){
-			if(state==OriginState.IN_BODY){
-				String message_content=asyncXMLStreamReader.getText();
-				String message_transformed=L33tConverter.leetify(message_content);
-				message_transformed=StringEscapeUtils.escapeXml11(message_transformed);
-				XMPPlistener.writeToClient(message_transformed, proxyState, selector);
-			}else{
-				passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
+		if (!(state == OriginState.STREAM_START_EXPECTED || state == OriginState.FEATURES_END_EXPECTED)) {
+			if (state == OriginState.IN_BODY) {
+				String message_content = asyncXMLStreamReader.getText();
+				String message_transformed = L33tConverter
+						.leetify(message_content);
+				message_transformed = StringEscapeUtils
+						.escapeXml11(message_transformed);
+				XMPPlistener.writeToClient(message_transformed, proxyState,
+						selector);
+				return;
+
+			} else if (state == OriginState.IN_USER_JID) {
+				proxyState.setCompleteUserJID(str);
 			}
-				
-			
-			
+			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
+
 		}
 
 	}
@@ -152,22 +158,25 @@ public class FromServerParser extends GenericParser {
 			ClosedChannelException {
 
 		if (state == OriginState.FEATURES_END_EXPECTED) {
+			return;
 			// omitir
 			// TODO revisar en caso de que no soporte autenticacion plana
 		} else if (state == OriginState.CONNECTED) {
 			// redirigir al cliente
 			String elementName = asyncXMLStreamReader.getLocalName();
 
+			switch (elementName) {
+			case SUCCESS: {
 
-			switch(elementName){
-			case SUCCESS:{
-				
-					proxyState.flagReset();
-				
+				proxyState.flagReset();
+				break;
+			}
+			case JID: {
+				state = OriginState.IN_USER_JID;
 			}
 			}
 			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
-		}else if(state==OriginState.IN_MESSAGE)
+		} else if (state == OriginState.IN_MESSAGE)
 			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 
 	}
@@ -184,7 +193,8 @@ public class FromServerParser extends GenericParser {
 
 	@Override
 	protected void processOtherEndElement(XMPPproxyState proxySstate,
-			Selector selector) throws ClosedChannelException, XMLStreamException, FileNotFoundException {
+			Selector selector) throws ClosedChannelException,
+			XMLStreamException, FileNotFoundException {
 		String elementName = asyncXMLStreamReader.getLocalName();
 
 		switch (elementName) {
@@ -198,35 +208,42 @@ public class FromServerParser extends GenericParser {
 				// .writeToOrigin(autentication, proxySstate, selector);
 				enqueueForOrigin(autentication);
 
-			} else if(!(state==OriginState.STREAM_START_EXPECTED )){
+			} else if (!(state == OriginState.STREAM_START_EXPECTED)) {
 				passDirectlyToClient(proxySstate, selector,
 						asyncXMLStreamReader);
 			}
 			break;
 
 		}
-		case SUCCESS:{
-			
-			if(state==OriginState.CONNECTED){
-				passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
+		case SUCCESS: {
+
+			if (state == OriginState.CONNECTED) {
+				passDirectlyToClient(proxySstate, selector,
+						asyncXMLStreamReader);
 				proxySstate.flagReset();
 			}
-			
+
 			break;
-		}case BODY:{
-			if(state==OriginState.IN_BODY){
-				state=OriginState.CONNECTED;
-				passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
+		}
+		case BODY: {
+			if (state == OriginState.IN_BODY) {
+				state = OriginState.CONNECTED;
+				passDirectlyToClient(proxySstate, selector,
+						asyncXMLStreamReader);
 				break;
 			}
-			
-				
+
 		}
-		
+		case JID:{
+			if(state==OriginState.IN_USER_JID)
+				state=OriginState.CONNECTED;
+		}
+
 		default: {
-			if(!(state==OriginState.STREAM_START_EXPECTED || state==OriginState.FEATURES_END_EXPECTED))
-				passDirectlyToClient(proxySstate, selector, asyncXMLStreamReader);
-			
+			if (!(state == OriginState.STREAM_START_EXPECTED || state == OriginState.FEATURES_END_EXPECTED))
+				passDirectlyToClient(proxySstate, selector,
+						asyncXMLStreamReader);
+
 			break;
 		}
 
@@ -266,17 +283,17 @@ public class FromServerParser extends GenericParser {
 	protected void processStartDocuement(XMPPproxyState proxyState,
 			Selector selector) throws ClosedChannelException,
 			XMLStreamException {
-		if(state==OriginState.CONNECTED){
+		if (state == OriginState.CONNECTED) {
 			passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
 		}
-		
+
 	}
 
-	public void reset(ByteBuffer originBuffer) throws FileNotFoundException, XMLStreamException {
+	public void reset(ByteBuffer originBuffer) throws FileNotFoundException,
+			XMLStreamException {
 		super.reset(originBuffer);
-		queueToSever=null;
-		
+		queueToSever = null;
+
 	}
 
-	
 }
