@@ -5,6 +5,7 @@
 # Descripción detallada de los protocolos y aplicaciones desarrolladas
 
 Protocolo administrador
+------------------------
 
 Las líneas enviadas tanto por el cliente como las respondidas por el servidor, deben 
 terminar con la secuencia CRLF.  
@@ -103,9 +104,26 @@ Para el caso los comandos "MET1" Y "MET2" el formato de la respuesta exitosa es 
 	
 Dado que el nombre de usuario se encuentra en codificacion UTF-8, todas las líneas que se reciben se interpretan en este formato.
 
+
+Parsers del protocolo XMPP
+--------------------------
+
+Para el caso en el que un usuario silenciado trate de enviar un mensaje y para el caso en el que el servidor origin trate de pasarle un 
+mensaje a un usuario silenciado, se procede a responderle con un mensaje de error a la parte que esta mandando el mensaje. Se decidió emplear el 
+mensaje de error que figura en el rfc 6120 punto  "8.3.3.10" denominado "not-allowed".Se decidió usar este tipo de mensaje de error para
+indicar que el servidor no permite enviar el mensaje desde o hacia un usuario silenciado.
+
 # Problemas encontrados durante el diseño y la implementación
+Durante las fases de diseño, se notó la complejidad que se deriva del parseo de streams xml.Inicialmente, se opto por utilizar librerías
+que implementan la interfaz STAX. El problema de las mismas fue que solo permitian parsear un conjunto de datos fijos, no stream de datos 
+como se necesita para este trabajo. Luego de investigar, se resolvio utilizar la librería "faster xml - Aalto" para el parseo ya que la misma 
+permite procesar nuevos datos a a medida que se reciben.
+
 
 # Limitaciones de la aplicación
+* Solo permite autenticación plana
+* No soporta encriptación
+* No soporta compresión
 
 # Posibles extensiones
 

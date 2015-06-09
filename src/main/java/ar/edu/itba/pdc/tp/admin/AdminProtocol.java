@@ -30,8 +30,8 @@ public class AdminProtocol implements TCPProtocol {
     private static final String INCORRECT_INT = "-ERR invalid command not an int\r\n";
     private static final String CORRECT_OPERATION = "+OK \r\n";
     private static final String CORRECT_ORIGIN_CHANGED = "+OK changed origin server for user \r\n";
-    private static final String TRANSFORMATION_ON_MSG = "+OK transformation of the subject is on \r\n";
-    private static final String TRANSFORMATION_OFF_MSG = "+OK transformation of the subject is off \r\n";
+    private static final String TRANSFORMATION_ON_MSG = "+OK transformation of the message is on \r\n";
+    private static final String TRANSFORMATION_OFF_MSG = "+OK transformation of the message is off \r\n";
     private static final String MULTIPLEXING_ON_MSG = "+OK accounts multiplexing is on\r\n";
     private static final String MULTIPLEXING_OFF_MSG = "+OK accounts multiplexing is off\r\n";
     private static final String silenceUser="MUTEON\\s.*\\r\\n";
