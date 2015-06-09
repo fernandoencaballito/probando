@@ -183,20 +183,24 @@ public class AdminProtocol implements TCPProtocol {
             	System.out.println(user);
             	if(patternValidateLocalPart.matcher(user).matches()){
             		 ans = SilenceUsermsg(user);
+            		 LOGGER.info("user silenced");
             	}
             	else{
             		ans=invalid_jid;
             	}
             } else if (patternMetricsTransfered.matcher(fromUser).matches()) {
                 ans = buildMetrics2Msg();
+                LOGGER.info("metrics transefered");
             } else if (patternTransformationOff.matcher(fromUser).matches()) {
                 ans = TRANSFORMATION_OFF_MSG;
                 reactorState.transformationOff();
             } else if (patternTransformationOn.matcher(fromUser).matches()) {
                 ans = TRANSFORMATION_ON_MSG;
+                LOGGER.info("transformation on");
                 reactorState.transformationOn();
             } else if (patternMultiplexingOn.matcher(fromUser).matches()) {
                 ans = MULTIPLEXING_ON_MSG;
+                LOGGER.info("multiplexing on");
                 reactorState.multiplexingOn();
             } else if (patternMultiplexingOff.matcher(fromUser).matches()) {
                 ans = MULTIPLEXING_OFF_MSG;
