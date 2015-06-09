@@ -31,7 +31,8 @@ public class FromClientParser extends GenericParser {
 	private static String INITIAL_TAG;
 	private static String MESSAGE_NOT_ACCEPTABLE;
 	private List<String> toClientQueue;
-
+	private static final String idNamespaceURI="";
+	private static final String idLocalName="id";
 	public FromClientParser(ByteBuffer buf) throws XMLStreamException,
 			FileNotFoundException {
 		super(buf);
@@ -121,11 +122,21 @@ public class FromClientParser extends GenericParser {
 			throws ClosedChannelException, XMLStreamException {
 
 		if (state == ClientState.CONNECTED_TO_ORIGIN) {
-			if (adminModule.isUserSilenced(proxyState.getUserName())) {
+			//primero se revisa que el usuario que envia no este silenciado.
+			boolean blockedMessage=adminModule.isUserSilenced(proxyState.getUserName());
+			// segundo se revisa que el usuario destino no este silenciado.
+			String toAttribute="to";
+			int toAttributeIndex=asyncXMLStreamReader.getAttributeIndex("",toAttribute );
+			String toAttributeValue=asyncXMLStreamReader.getAttributeValue(toAttributeIndex);
+			
+			//se separa localpart del resto del jid del destino
+			String destinationLocalpart=(toAttributeValue==null)?"":toAttributeValue.split("@")[0];
+			blockedMessage=blockedMessage || adminModule.isUserSilenced(destinationLocalpart);
+			//
+			if (blockedMessage) {
 				state=ClientState.IN_MUTED_MESSAGE;
 				
-				String idNamespaceURI="";
-				String idLocalName="id";
+				
 				int idAttributeIndex=asyncXMLStreamReader.getAttributeIndex(idNamespaceURI, idLocalName);
 				String id=asyncXMLStreamReader.getAttributeValue(idAttributeIndex);
 				proxyState.setId(id);
