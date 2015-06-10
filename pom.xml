@@ -5,7 +5,7 @@
 	<artifactId>tp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>TP PDC</name>
-	<description>Proxy POP3</description>
+	<description>Proxy XMPP</description>
 	<dependencies>
 
 		<!-- General utilities -->
@@ -20,12 +20,7 @@
 			<artifactId>spring-core</artifactId>
 			<version>4.1.1.RELEASE</version>
 		</dependency>
-		<!-- Dates and time -->
-		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
-			<version>2.4</version>
-		</dependency>
+		
 		<!-- commons base64 -->
 		<dependency>
 			<groupId>commons-codec</groupId>
