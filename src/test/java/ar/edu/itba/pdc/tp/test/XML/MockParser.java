@@ -40,7 +40,7 @@ public class MockParser extends GenericParser {
 
 	@Override
 	protected void processStreamElementEnd(XMPPproxyState state,
-			Selector selector) throws ClosedChannelException,
+			Selector selector, TCPReactor reactor) throws ClosedChannelException,
 			XMLStreamException {
 		streamElementEnd = true;
 

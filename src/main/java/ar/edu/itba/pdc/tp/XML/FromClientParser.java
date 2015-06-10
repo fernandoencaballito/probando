@@ -24,7 +24,7 @@ import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 public class FromClientParser extends GenericParser {
 	private static enum ClientState {
 		CONNECTION_STABLISHED, AUTH_EXPECTED, AUTH_VALUE_EXPECTED, AUTH_END_EXPECTED, CONNECTING_TO_ORIGIN, CONNECTED_TO_ORIGIN
-	,IN_MUTED_MESSAGE};
+	,IN_MUTED_MESSAGE,CLOSING,CLOSED};
 
 	private ClientState state;
 	private static String PROPERTIES_FILENAME = "./properties/clientParser.properties";
@@ -71,10 +71,18 @@ public class FromClientParser extends GenericParser {
 
 	@Override
 	protected void processStreamElementEnd(XMPPproxyState proxyState,
-			Selector selector) throws ClosedChannelException,
-			XMLStreamException {
-		if (state == ClientState.CONNECTED_TO_ORIGIN)
+			Selector selector, TCPReactor reactor) throws ClosedChannelException,
+			XMLStreamException, FileNotFoundException {
+		if (state != ClientState.CLOSED){
+			state=ClientState.CLOSING;
 			passDirectlyToOriginServer(proxyState, selector);
+			//el que inicio el cierre fue el origin server
+			if(proxyState.getServerParser().isClosing()){
+				//se cierra la conexion
+				XMPPlistener.closeConnections(proxyState, selector,reactor);
+				state=ClientState.CLOSED;
+			}
+		}
 
 	}
 
@@ -116,23 +124,28 @@ public class FromClientParser extends GenericParser {
 
 	}
 
+	private boolean checkBlockedMessage(AdminModule adminModule,XMPPproxyState proxyState){
+		//primero se revisa que el usuario que envia no este silenciado.
+		boolean blockedMessage=adminModule.isUserSilenced(proxyState.getUserName());
+		// segundo se revisa que el usuario destino no este silenciado.
+		String toAttribute="to";
+		int toAttributeIndex=asyncXMLStreamReader.getAttributeIndex("",toAttribute );
+		String toAttributeValue=asyncXMLStreamReader.getAttributeValue(toAttributeIndex);
+		
+		//se separa localpart del resto del jid del destino
+		String destinationLocalpart=(toAttributeValue==null)?"":toAttributeValue.split("@")[0];
+		blockedMessage=blockedMessage || adminModule.isUserSilenced(destinationLocalpart);
+		//
+		return blockedMessage;
+	}
 	@Override
 	protected void processMessageElementStart(XMPPproxyState proxyState,
 			Selector selector, AdminModule adminModule)
 			throws ClosedChannelException, XMLStreamException {
 
 		if (state == ClientState.CONNECTED_TO_ORIGIN) {
-			//primero se revisa que el usuario que envia no este silenciado.
-			boolean blockedMessage=adminModule.isUserSilenced(proxyState.getUserName());
-			// segundo se revisa que el usuario destino no este silenciado.
-			String toAttribute="to";
-			int toAttributeIndex=asyncXMLStreamReader.getAttributeIndex("",toAttribute );
-			String toAttributeValue=asyncXMLStreamReader.getAttributeValue(toAttributeIndex);
+			boolean blockedMessage=checkBlockedMessage(adminModule, proxyState);
 			
-			//se separa localpart del resto del jid del destino
-			String destinationLocalpart=(toAttributeValue==null)?"":toAttributeValue.split("@")[0];
-			blockedMessage=blockedMessage || adminModule.isUserSilenced(destinationLocalpart);
-			//
 			if (blockedMessage) {
 				state=ClientState.IN_MUTED_MESSAGE;
 				
@@ -312,6 +325,10 @@ public class FromClientParser extends GenericParser {
 				replacementList);
 		return ans;
 
+	}
+
+	public boolean isClosing() {
+		return state==ClientState.CLOSING;
 	}
 
 }

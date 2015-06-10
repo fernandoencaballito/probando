@@ -1,6 +1,5 @@
 package ar.edu.itba.pdc.tp.XML;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 

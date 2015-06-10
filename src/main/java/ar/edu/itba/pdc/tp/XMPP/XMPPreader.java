@@ -47,6 +47,7 @@ class XMPPreader implements TCPEventHandler {
 
 		GenericParser parser = null;
 		long bytesRead = readChannel.read(readBuffer);
+		if(bytesRead>0)
 		LOGGER.info(readChannel.getLocalAddress() + " reading from " + readChannel.getRemoteAddress()+" "+bytesRead+"bytes.");
 		
 		
@@ -73,9 +74,8 @@ class XMPPreader implements TCPEventHandler {
 		}
 
 		if (bytesRead == -1) { // Did the other end close?
-			proxyState.closeChannels();
-			reactor.unsubscribeChannel(proxyState.getClientChannel());
-			reactor.unsubscribeChannel(proxyState.getOriginChannel());
+			XMPPlistener.closeConnections(proxyState, key.selector(), reactor);
+			
 		} else if (bytesRead > 0) {
 
 			// processar lo leido con el parser

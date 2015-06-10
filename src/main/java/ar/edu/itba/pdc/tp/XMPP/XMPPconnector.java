@@ -37,20 +37,15 @@ class XMPPconnector implements TCPEventHandler {
                 state.closeChannels();
             }
         } catch (IOException | XMLStreamException e) {
-            LOGGER.error("Failed to connect to origin server("
-                    + originChannel.getRemoteAddress() + "): " + e.getMessage());
+            LOGGER.error("Failed to connect to origin server: "
+                     + e.getMessage());
             
-//            ByteBuffer clientBuffer = state.getClientBuffer();
-//            writeMsg(clientBuffer, UNABLE_TO_CONNECT_MSG);
-//            state.updateSubscription(key.selector());
+            XMPPlistener.announceFailedConnectionToOrigin(state,key.selector());
         }
         
 
        
     }
 
-    private void writeMsg(ByteBuffer toClientBuffer, String msg) { // XXX
-        // toClientBuffer.clear();
-        // toClientBuffer.put(msg.getBytes());
-    }
+    
 }

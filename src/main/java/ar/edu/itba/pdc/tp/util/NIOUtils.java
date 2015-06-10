@@ -21,9 +21,12 @@ public class NIOUtils {
 	}
 
 	public static void closeQuietly(Channel channel) {
-		try {
-			channel.close();
-		} catch (Exception e) {
+		if (channel != null && channel.isOpen()) {
+			try {
+				channel.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -82,10 +85,10 @@ public class NIOUtils {
 		fromBuffer.limit(newLimit);
 		fromBuffer.compact();
 	}
-	
-	public static String getFirstLine(ByteBuffer buffer){
-	    String all = readBuffer(buffer);
-	    String[] split = all.split("\r\n");
-	    return split[0];
+
+	public static String getFirstLine(ByteBuffer buffer) {
+		String all = readBuffer(buffer);
+		String[] split = all.split("\r\n");
+		return split[0];
 	}
 }

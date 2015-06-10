@@ -25,7 +25,8 @@ import com.fasterxml.aalto.AsyncXMLStreamReader;
 public class FromServerParser extends GenericParser {
 	private enum OriginState {
 		STREAM_START_EXPECTED, FEATURES_END_EXPECTED, CONNECTED, IN_MESSAGE, IN_BODY, 
-		IN_MUTED_MESSAGE, IN_USER_JID, EXPECTING_JID_END
+		IN_MUTED_MESSAGE, IN_USER_JID, EXPECTING_JID_END,
+		CLOSING, CLOSED
 	};
 
 	private OriginState state;
@@ -73,10 +74,18 @@ public class FromServerParser extends GenericParser {
 
 	@Override
 	protected void processStreamElementEnd(XMPPproxyState proxyState,
-			Selector selector) throws ClosedChannelException,
-			XMLStreamException {
-		passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
-
+			Selector selector, TCPReactor reactor) throws ClosedChannelException,
+			XMLStreamException, FileNotFoundException {
+		if(state!=OriginState.CLOSED){
+			state=OriginState.CLOSING;
+			 passDirectlyToClient(proxyState, selector, asyncXMLStreamReader);
+			
+			//el cliente origino el cierre del stream
+			if(proxyState.getClientParser().isClosing()){
+				XMPPlistener.closeConnections(proxyState, selector,reactor);
+				state=OriginState.CLOSED;
+			}
+		}
 	}
 
 	@Override
@@ -250,6 +259,13 @@ public class FromServerParser extends GenericParser {
 		}
 	}
 
+	
+		private void enqueueForOrigin() throws XMLStreamException {
+			String str=XMLconstructor.constructXML(asyncXMLStreamReader);
+			enqueueForOrigin(str);
+
+		}
+	
 	// encola datos a enviar al origin server
 	private void enqueueForOrigin(String str) {
 		if (queueToSever == null)
@@ -294,6 +310,15 @@ public class FromServerParser extends GenericParser {
 		super.reset(originBuffer);
 		queueToSever = null;
 
+	}
+
+	public boolean isClosing() {
+		return this.state==OriginState.CLOSING;
+	}
+
+	public void announceClosing() {
+		this.state=OriginState.CLOSING;
+		
 	}
 
 }

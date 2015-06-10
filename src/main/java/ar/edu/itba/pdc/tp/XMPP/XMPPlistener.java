@@ -22,7 +22,8 @@ import ar.edu.itba.pdc.tp.util.PropertiesFileLoader;
 public class XMPPlistener {
 	private static String INITIAL_TAG;
 	private static String PROPERTIES_FILENAME = "./properties/XMPPlistener.properties";
-	
+	private static String REMOTE_CONNECTION_FAILED;
+	private static String INTERNAL_SERVER_ERROR;
 	public static void connectToOrigin(XMPPproxyState state, Selector selector,
 			AdminModule adminModule, XMPproxy protocol, TCPReactor reactor)
 			throws IOException, XMLStreamException {
@@ -39,11 +40,15 @@ public class XMPPlistener {
 		Properties properties = PropertiesFileLoader
 				.loadPropertiesFromFile(fileName);
 		INITIAL_TAG = properties.getProperty("INITIAL_TAG");
+		REMOTE_CONNECTION_FAILED=properties.getProperty("REMOTE_CONNECTION_FAILED");
+		INTERNAL_SERVER_ERROR=properties.getProperty("INTERNAL_SERVER_ERROR");
 	}
 
 
-	public static void closeConnection(XMPPproxyState state, SelectionKey key) {
-		// TODO Auto-generated method stub
+	public static void closeConnections(XMPPproxyState proxyState, Selector selector,TCPReactor reactor)  {
+		proxyState.closeChannels();
+		reactor.unsubscribeChannel(proxyState.getClientChannel());
+		reactor.unsubscribeChannel(proxyState.getOriginChannel());
 
 	}
 
@@ -93,6 +98,28 @@ public class XMPPlistener {
 			Selector selector) throws ClosedChannelException {
 		writeToClient(str.getBytes(), state, selector);
 
+	}
+
+	public static void announceFailedConnectionToOrigin(XMPPproxyState state,Selector selector) {
+		
+		try {
+			
+			state.getServerParser().announceClosing();
+		} catch (FileNotFoundException | XMLStreamException e) {
+			
+		}
+		
+		try{
+			if(INTERNAL_SERVER_ERROR==null)
+			loadPropertiesFile(PROPERTIES_FILENAME);
+			writeToClient(REMOTE_CONNECTION_FAILED, state, selector);
+		}catch(Exception e){
+			
+		}
+		
+		
+		
+		
 	}
 
 }

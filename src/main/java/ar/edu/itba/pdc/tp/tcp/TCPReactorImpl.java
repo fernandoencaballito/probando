@@ -107,6 +107,7 @@ public class TCPReactorImpl implements TCPReactor {
 					System.out.println("entro en write");
 				}
 			}
+			
 			keyIter.remove(); // remove from set of selected keys
 		}
 	}

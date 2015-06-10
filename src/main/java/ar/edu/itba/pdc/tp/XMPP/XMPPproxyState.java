@@ -22,64 +22,67 @@ import ar.edu.itba.pdc.tp.XML.GenericParser;
 import ar.edu.itba.pdc.tp.XML.User;
 
 public class XMPPproxyState {
-	private  int BUFF_SIZE ;
+	private int BUFF_SIZE;
 
-	private  ByteBuffer originBuffer ;
-	
-	private  ByteBuffer clientBuffer ;
+	private ByteBuffer originBuffer;
 
-	private final SocketChannel clientChannel;
+	private ByteBuffer clientBuffer;
+
+	private  SocketChannel clientChannel;
 	private SocketChannel originChannel = null;
 
 	private FromClientParser clientParser;
-	
+
 	private FromServerParser serverParser;
 	private User user;
 
-	private boolean hasToResetStreams=false;
-	private boolean hastToResetClientParser=false;
+	private boolean hasToResetStreams = false;
+	private boolean hastToResetClientParser = false;
 
 	private String id;
-	
-	private boolean hastToResetOriginParser=false;
-	XMPPproxyState(final SocketChannel clientChannel,int bufferSize) throws FileNotFoundException, XMLStreamException {
+
+	private boolean hastToResetOriginParser = false;
+
+	XMPPproxyState(final SocketChannel clientChannel, int bufferSize)
+			throws FileNotFoundException, XMLStreamException {
 		this.clientChannel = clientChannel;
-		this.BUFF_SIZE=bufferSize;
-		originBuffer= ByteBuffer.allocate(BUFF_SIZE);
+		this.BUFF_SIZE = bufferSize;
+		originBuffer = ByteBuffer.allocate(BUFF_SIZE);
 		clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
-			}
+	}
 
-	
-	void closeChannels() throws IOException {
+	void closeChannels() {
 		closeQuietly(clientChannel);
-		if (originChannel != null) {
-			closeQuietly(originChannel);
-		}
+		clientChannel=null;
+		closeQuietly(originChannel);
+		originChannel=null;
+
 	}
 
-	public void setId(String id){
-		this.id=id;
+	public void setId(String id) {
+		this.id = id;
 	}
-	public String getId(){
+
+	public String getId() {
 		return id;
 	}
-	
-	
-	public boolean hasToReset(){
+
+	public boolean hasToReset() {
 		return hasToResetStreams;
 	}
-	public void flagReset(){
-		hasToResetStreams=true;
+
+	public void flagReset() {
+		hasToResetStreams = true;
 	}
-	
-	void setOriginChannel(SocketChannel originChannel) throws FileNotFoundException, XMLStreamException {
+
+	void setOriginChannel(SocketChannel originChannel)
+			throws FileNotFoundException, XMLStreamException {
 		if (this.originChannel != null) {
 			throw new IllegalStateException();
 		}
 		this.originChannel = originChannel;
-//		this.serverParser= new FromServerParser(originBuffer);
+		// this.serverParser= new FromServerParser(originBuffer);
 	}
-
 
 	SocketChannel getClientChannel() {
 		return clientChannel;
@@ -97,26 +100,19 @@ public class XMPPproxyState {
 		return originBuffer;
 	}
 
-	public String getUserPlainAuth(){
+	public String getUserPlainAuth() {
 		return user.getPlainAuth();
 	}
-	
-
-
-
-
 
 	boolean isConnectedToOrigin() {
 		return originChannel != null && originChannel.isOpen()
 				&& originChannel.isConnected();
 	}
 
-	
 	enum States {
 		EXPECT_USER_OK, EXPECT_PASS_OK, EXPECT_RETR_DATA, GREETING, TRANSACTION, QUITTING, AUTHENTICATION
 	}
 
-	
 	ByteBuffer getReadBuffer(SocketChannel channel) {
 		if (clientChannel == channel) {
 			return clientBuffer;
@@ -126,42 +122,39 @@ public class XMPPproxyState {
 		}
 		throw new IllegalArgumentException("Unknown socket");
 	}
-	
-	
 
 	// *proxy's* write, that is, where the other end will *read*
 	ByteBuffer getWriteBuffer(final SocketChannel channel) {
 		if (clientChannel == channel) {
-			
-				return clientBuffer;
-			}
-		
+
+			return clientBuffer;
+		}
+
 		if (originChannel == channel) {
 			return originBuffer;
 		}
 		throw new IllegalArgumentException("Unknown socket");
 	}
-	
-	
+
 	void updateSubscription(Selector selector) throws ClosedChannelException {
 		int originFlags = 0;
 		int clientFlags = 0;
 
-//		if (originBuffer!=null && originBuffer.hasRemaining()) {
-//			originFlags |= SelectionKey.OP_READ;
-//		}
+		// if (originBuffer!=null && originBuffer.hasRemaining()) {
+		// originFlags |= SelectionKey.OP_READ;
+		// }
 
-		if (clientBuffer!=null && clientBuffer.hasRemaining()) {
+		if (clientBuffer != null && clientBuffer.hasRemaining()) {
 			clientFlags |= SelectionKey.OP_READ;
 		}
 
-		if (clientBuffer!=null && clientBuffer.position() > 0) {
+		if (clientBuffer != null && clientBuffer.position() > 0) {
 			clientFlags |= SelectionKey.OP_WRITE;
 		}
 
-//		if (originBuffer!=null && originBuffer.position() > 0 ) {
-//			clientFlags |= SelectionKey.OP_WRITE;
-//		}
+		// if (originBuffer!=null && originBuffer.position() > 0 ) {
+		// clientFlags |= SelectionKey.OP_WRITE;
+		// }
 
 		clientChannel.register(selector, clientFlags, this);
 		if (isConnectedToOrigin()) {
@@ -169,81 +162,69 @@ public class XMPPproxyState {
 		}
 	}
 
-
-	public FromClientParser getClientParser() throws FileNotFoundException, XMLStreamException {
-		if(clientParser==null)
-			this.clientParser=new FromClientParser(clientBuffer);
-		else if(hastToResetClientParser){
-			hastToResetClientParser=false;
+	public FromClientParser getClientParser() throws FileNotFoundException,
+			XMLStreamException {
+		if (clientParser == null)
+			this.clientParser = new FromClientParser(clientBuffer);
+		else if (hastToResetClientParser) {
+			hastToResetClientParser = false;
 			clientParser.reset(clientBuffer);
 		}
-		
+
 		return clientParser;
-		
+
 	}
-	
-	
 
-
-	public FromServerParser getServerParser() throws FileNotFoundException, XMLStreamException {
-		if(serverParser==null)
-			serverParser=new FromServerParser(originBuffer);
-		else if(hastToResetOriginParser){
-			hastToResetOriginParser=false;
+	public FromServerParser getServerParser() throws FileNotFoundException,
+			XMLStreamException {
+		if (serverParser == null)
+			serverParser = new FromServerParser(originBuffer);
+		else if (hastToResetOriginParser) {
+			hastToResetOriginParser = false;
 			serverParser.reset(originBuffer);
 		}
 		return serverParser;
 	}
 
-
 	public void setUser(User user) {
-		this.user=user;
-		
-	}
-	
-	public String getUserName(){
-		return this.user.getUsername();
-		
+		this.user = user;
+
 	}
 
+	public String getUserName() {
+		return this.user.getUsername();
+
+	}
 
 	public void resetStream() throws FileNotFoundException, XMLStreamException {
-		if(hasToResetStreams){
-			hasToResetStreams=false;
-			hastToResetOriginParser=true;
+		if (hasToResetStreams) {
+			hasToResetStreams = false;
+			hastToResetOriginParser = true;
 			originBuffer.clear();
-//			originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
-//			serverParser=serverParser.reset(originBuffer);
-			 
-			hastToResetClientParser=true;
-			clientBuffer.clear();
-//			clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
-//			clientParser=clientParser.reset(clientBuffer);
-				
-		}
-		
-		
-		
-	}
+			// originBuffer= ByteBuffer.allocate(BUFF_SIZE); ;
+			// serverParser=serverParser.reset(originBuffer);
 
+			hastToResetClientParser = true;
+			clientBuffer.clear();
+			// clientBuffer = ByteBuffer.allocate(BUFF_SIZE);
+			// clientParser=clientParser.reset(clientBuffer);
+
+		}
+
+	}
 
 	public void setCompleteUserJID(String userJID) {
-		
+
 		this.user.setCompleteUserJID(userJID);
-		
+
 	}
-	
-	public String getCompleteUserJID(){
-		String ans=null;
-		if(user!=null)
-			ans=user.getCompleteUserJID();
+
+	public String getCompleteUserJID() {
+		String ans = null;
+		if (user != null)
+			ans = user.getCompleteUserJID();
 		return ans;
-		
+
 	}
 
-
-	
-
-
-	
 }

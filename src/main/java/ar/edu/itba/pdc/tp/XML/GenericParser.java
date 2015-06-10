@@ -160,7 +160,7 @@ public abstract class GenericParser {
 		String elementName = qname.getLocalPart();
 		switch (elementName) {
 		case STREAM: {
-			processStreamElementEnd(state, selector);
+			processStreamElementEnd(state, selector, null);
 			break;
 		}
 		case MESSAGE: {
@@ -225,8 +225,8 @@ public abstract class GenericParser {
 
 	// solo parar elemento /STREAM:STREAM
 	protected abstract void processStreamElementEnd(XMPPproxyState state,
-			Selector selector) throws ClosedChannelException,
-			XMLStreamException;
+			Selector selector, TCPReactor reactor) throws ClosedChannelException,
+			XMLStreamException, FileNotFoundException;
 
 	protected abstract void processAuthElementStart(XMPPproxyState state,
 			Selector selector) throws ClosedChannelException,
